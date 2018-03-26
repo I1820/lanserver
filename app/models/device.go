@@ -1,8 +1,11 @@
 package models
 
-// Device that is connected to LAN gateway
+import "net"
+
+// Device that is connected by LAN
 type Device struct {
 	Name    string
-	DevEUI  int64 // System wide identification
-	DevAddr int   // network wide identification
+	DevEUI  int64  // System wide identification
+	DevAddr net.IP // network wide identification
+	Token   string // Device JWT token
 }
