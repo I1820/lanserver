@@ -32,9 +32,10 @@ func InitDB() {
 	// Device collection
 	cp := DB.C("device")
 	if err := cp.EnsureIndex(mgo.Index{
-		Key: []string{"deveui"},
+		Key:    []string{"deveui"},
+		Unique: true,
 	}); err != nil {
-		revel.AppLog.Errorf("DB connection error: %s", err)
+		revel.AppLog.Errorf("DB ensure index error: %s", err)
 		return
 	}
 
