@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/aiotrc/lanserver.sh/app/models"
 	"github.com/revel/revel"
 )
@@ -14,7 +16,12 @@ type Device struct {
 func (c Device) Create() revel.Result {
 	var d models.Device
 
-	c.Params.BindJSON(&d)
+	if err := c.Params.BindJSON(&d); err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
 
 	return c.RenderJSON(d)
 }
