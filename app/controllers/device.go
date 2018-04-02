@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
 	"github.com/revel/revel"
 )
@@ -18,6 +19,13 @@ func (c Device) Create() revel.Result {
 
 	if err := c.Params.BindJSON(&d); err != nil {
 		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	if err := app.DB.C("device").Insert(d); err != nil {
+		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
 		}
