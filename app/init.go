@@ -1,6 +1,9 @@
 package app
 
 import (
+	"database/sql"
+	"fmt"
+
 	"github.com/revel/revel"
 )
 
@@ -11,6 +14,21 @@ var (
 	// BuildTime revel app build-time (ldflags)
 	BuildTime string
 )
+
+// DB is a connection to database
+var DB *sql.DB
+
+// InitDB initiates a connection to a database
+func InitDB() {
+	connstring := fmt.Sprintf("user=%s password='%s' dbname=%s sslmode=disable", "user", "pass", "database")
+
+	var err error
+	DB, err = sql.Open("postgres", connstring)
+	if err != nil {
+		revel.INFO.Println("DB Error", err)
+	}
+	revel.INFO.Println("DB Connected")
+}
 
 func init() {
 	// Filters is the default set of global filters.
