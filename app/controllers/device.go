@@ -6,6 +6,7 @@ import (
 	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
 	"github.com/revel/revel"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Device controller controls system devices
@@ -32,4 +33,18 @@ func (c Device) Create() revel.Result {
 	}
 
 	return c.RenderJSON(d)
+}
+
+// List lists all devices
+func (c Device) List() revel.Result {
+	var results []bson.M
+
+	if err := app.DB.C("device").Find(bson.M{}).All(&results); err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderJSON(results)
 }
