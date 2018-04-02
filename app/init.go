@@ -25,9 +25,10 @@ func InitDB() {
 	var err error
 	DB, err = sql.Open("postgres", connstring)
 	if err != nil {
-		revel.INFO.Println("DB Error", err)
+		revel.AppLog.Errorf("DB connection error: %s", err)
+		return
 	}
-	revel.INFO.Println("DB Connected")
+	revel.AppLog.Infof("DB Connected")
 }
 
 func init() {
@@ -51,7 +52,7 @@ func init() {
 	// revel.DevMode and revel.RunMode only work inside of OnAppStart. See Example Startup Script
 	// ( order dependent )
 	// revel.OnAppStart(ExampleStartupScript)
-	// revel.OnAppStart(InitDB)
+	revel.OnAppStart(InitDB)
 	// revel.OnAppStart(FillCache)
 }
 
