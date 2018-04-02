@@ -1,10 +1,8 @@
 package app
 
 import (
-	"database/sql"
-	"fmt"
-
 	"github.com/revel/revel"
+	mgo "gopkg.in/mgo.v2"
 )
 
 var (
@@ -16,18 +14,30 @@ var (
 )
 
 // DB is a connection to database
-var DB *sql.DB
+var DB *mgo.Database
 
 // InitDB initiates a connection to a database
 func InitDB() {
-	connstring := fmt.Sprintf("user=%s password='%s' dbname=%s sslmode=disable", "user", "pass", "database")
+	url := revel.Config.StringDefault("db.url", "127.0.0.1")
 
-	var err error
-	DB, err = sql.Open("postgres", connstring)
+	session, err := mgo.Dial(url)
 	if err != nil {
 		revel.AppLog.Errorf("DB connection error: %s", err)
 		return
 	}
+	DB = session.DB("lanserver")
+	// Optional. Switch the session to a monotonic behavior.
+	session.SetMode(mgo.Monotonic, true)
+
+	// Device collection
+	cp := DB.C("device")
+	if err := cp.EnsureIndex(mgo.Index{
+		Key: []string{"deveui"},
+	}); err != nil {
+		revel.AppLog.Errorf("DB connection error: %s", err)
+		return
+	}
+
 	revel.AppLog.Infof("DB Connected")
 }
 
