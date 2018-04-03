@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/revel/revel"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -24,6 +26,24 @@ func (c Device) Create() revel.Result {
 			Error: err,
 		}
 	}
+
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer: "lanserver.sh",
+		Id:     strconv.FormatInt(d.DevEUI, 10),
+	})
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte(d.Token))
+	if err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	d.Token = tokenString
 
 	if err := app.DB.C("device").Insert(d); err != nil {
 		c.Response.Status = http.StatusInternalServerError
