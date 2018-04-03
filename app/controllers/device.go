@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
@@ -30,8 +31,9 @@ func (c Device) Create() revel.Result {
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer: "lanserver.sh",
-		Id:     strconv.FormatInt(d.DevEUI, 10),
+		Issuer:   "lanserver.sh",
+		Id:       strconv.FormatInt(d.DevEUI, 10),
+		IssuedAt: time.Now().Unix(),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
