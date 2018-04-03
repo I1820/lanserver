@@ -39,7 +39,7 @@ func InitDB() {
 		return
 	}
 
-	revel.AppLog.Infof("DB Connected")
+	revel.AppLog.Infof("DB Connected: %s", url)
 }
 
 func init() {
