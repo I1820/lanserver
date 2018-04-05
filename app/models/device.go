@@ -9,3 +9,7 @@ type Device struct {
 	DevAddr net.IP // network wide identification
 	Token   string // Device JWT token
 }
+
+// DeviceProfile that is a profile for many connected device
+type DeviceProfile struct {
+}
