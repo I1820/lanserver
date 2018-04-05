@@ -19,6 +19,7 @@ GET     /public/*filepath                       Static.Serve("public")
 POST	/device					Device.Create
 GET	/device					Device.List
 DELETE	/device/:id				Device.Remove
+POST	/device/:id/push			Device.Push
 
 # Catch all, this will route any request into the controller path
 #
