@@ -70,3 +70,25 @@ func (c Device) List() revel.Result {
 
 	return c.RenderJSON(results)
 }
+
+// Remove removes given device
+func (c Device) Remove() revel.Result {
+	deveui, err := strconv.ParseInt(c.Params.Route.Get("id"), 10, 64)
+	if err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	if err := app.DB.C("device").Remove(bson.M{
+		"deveui": deveui,
+	}); err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderText(strconv.FormatInt(deveui, 10))
+}
