@@ -1,7 +1,11 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/revel/revel"
+	"github.com/yosssi/gmq/mqtt/client"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -50,6 +54,30 @@ func InitSecret() {
 	Secret = []byte(revel.Config.StringDefault("app.secret", "shamin"))
 }
 
+// Mqtt client
+var Mqtt *client.Client
+
+// InitMQTT creates connection
+func InitMQTT() {
+	// Create an MQTT Client.
+	Mqtt = client.New(&client.Options{
+		// Define the processing of the error handler.
+		ErrorHandler: func(err error) {
+			fmt.Println(err)
+		},
+	})
+
+	// Connect to the MQTT Server.
+	if err := Mqtt.Connect(&client.ConnectOptions{
+		Network:  "tcp",
+		Address:  revel.Config.StringDefault("mqtt.url", "127.0.0.1:1883"),
+		ClientID: []byte("lanserver.sh-client"),
+	}); err != nil {
+		revel.AppLog.Errorf("MQTT connection error: %s", err)
+		return
+	}
+}
+
 func init() {
 	// Filters is the default set of global filters.
 	revel.Filters = []revel.Filter{
@@ -73,6 +101,7 @@ func init() {
 	// revel.OnAppStart(ExampleStartupScript)
 	revel.OnAppStart(InitDB)
 	revel.OnAppStart(InitSecret)
+	revel.OnAppStart(InitMQTT)
 	// revel.OnAppStart(FillCache)
 }
 
