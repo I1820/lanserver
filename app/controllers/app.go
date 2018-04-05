@@ -11,5 +11,5 @@ type App struct {
 
 // Index method handles route "/"
 func (c App) Index() revel.Result {
-	return c.Render()
+	return c.RenderText("18.20 is leaving us")
 }
