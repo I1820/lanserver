@@ -97,6 +97,25 @@ func (c Device) Remove() revel.Result {
 // Push stores device given data
 func (c Device) Push() revel.Result {
 	id := c.Params.Route.Get("id")
+	deveui, err := strconv.ParseInt(c.Params.Route.Get("id"), 10, 64)
+	if err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	var results []bson.M
+
+	if err := app.DB.C("device").Find(bson.M{
+		"deveui": deveui,
+	}).All(&results); err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+	stoken := results[0]["token"]
 
 	var d struct {
 		Token string
@@ -107,6 +126,13 @@ func (c Device) Push() revel.Result {
 		c.Response.Status = http.StatusBadRequest
 		return revel.ErrorResult{
 			Error: err,
+		}
+	}
+
+	if stoken != d.Token {
+		c.Response.Status = http.StatusForbidden
+		return revel.ErrorResult{
+			Error: fmt.Errorf("Invalid token"),
 		}
 	}
 
