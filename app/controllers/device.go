@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -37,7 +38,7 @@ func (c Device) Create() revel.Result {
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte(d.Token))
+	tokenString, err := token.SignedString(app.Secret)
 	if err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
@@ -91,4 +92,41 @@ func (c Device) Remove() revel.Result {
 	}
 
 	return c.RenderText(strconv.FormatInt(deveui, 10))
+}
+
+// Push stores device given data
+func (c Device) Push() revel.Result {
+	id := c.Params.Route.Get("id")
+
+	var d struct {
+		Token string
+		Data  []byte
+	}
+
+	if err := c.Params.BindJSON(&d); err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	token, err := jwt.ParseWithClaims(d.Token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		c := token.Claims.(*jwt.StandardClaims)
+
+		if !c.VerifyIssuer("lanserver.sh", true) {
+			return nil, fmt.Errorf("Unexpected issuer %v", c.Issuer)
+		}
+		if c.Id != id {
+			return nil, fmt.Errorf("Mismatched identifier %s != %s", c.Id, id)
+		}
+		return app.Secret, nil
+	})
+	if err != nil {
+		c.Response.Status = http.StatusForbidden
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderJSON(token.Claims)
 }
