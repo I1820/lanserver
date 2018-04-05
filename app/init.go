@@ -42,6 +42,14 @@ func InitDB() {
 	revel.AppLog.Infof("DB Connected: %s", url)
 }
 
+// Secret key for signing jwt tokens
+var Secret []byte
+
+// InitSecret gets secret value from app.conf
+func InitSecret() {
+	Secret = []byte(revel.Config.StringDefault("app.secret", "shamin"))
+}
+
 func init() {
 	// Filters is the default set of global filters.
 	revel.Filters = []revel.Filter{
@@ -64,6 +72,7 @@ func init() {
 	// ( order dependent )
 	// revel.OnAppStart(ExampleStartupScript)
 	revel.OnAppStart(InitDB)
+	revel.OnAppStart(InitSecret)
 	// revel.OnAppStart(FillCache)
 }
 
