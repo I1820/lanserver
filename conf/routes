@@ -6,9 +6,6 @@
 module:testrunner
 # module:jobs
 
-
-GET     /                                       App.Index
-
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
@@ -20,6 +17,10 @@ POST	/device					Device.Create
 GET	/device					Device.List
 DELETE	/device/:id				Device.Remove
 POST	/device/:id/push			Device.Push
+
+
+# Applications
+POST	/application				App.Create
 
 # Catch all, this will route any request into the controller path
 #
