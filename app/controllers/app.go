@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"net/http"
+
+	"github.com/aiotrc/lanserver.sh/app/models"
 	"github.com/revel/revel"
 )
 
@@ -9,7 +12,16 @@ type App struct {
 	*revel.Controller
 }
 
-// Index method handles route "/"
-func (c App) Index() revel.Result {
-	return c.RenderText("18.20 is leaving us")
+// Create creates new application
+func (c *App) Create() revel.Result {
+	var a models.Application
+
+	if err := c.Params.BindJSON(&a); err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderJSON(a)
 }
