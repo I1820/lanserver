@@ -16,11 +16,11 @@ GET     /favicon.ico                            404
 GET     /public/*filepath                       Static.Serve("public")
 
 # Devices
-POST	/device					Device.Create
-GET	/device					Device.List
-DELETE	/device/:id				Device.Remove
+POST	/application/:aid/device		Device.Create
+GET	/application/:aid/device		Device.List
+DELETE	/application/:aid/device/:id		Device.Remove
 POST	/device/:id/push			Device.Push
-GET	/device/:id/refresh			Device.Refresh
+GET	/application/:aid/device/:id/refresh	Device.Refresh
 
 # Device Profiles
 POST	/device-profile				DeviceProfile.Create
