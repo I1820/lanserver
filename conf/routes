@@ -21,6 +21,9 @@ GET	/device					Device.List
 DELETE	/device/:id				Device.Remove
 POST	/device/:id/push			Device.Push
 
+# Device Profiles
+POST	/device-profile				DeviceProfile.Create
+
 # Catch all, this will route any request into the controller path
 #
 #                    **** WARNING ****
