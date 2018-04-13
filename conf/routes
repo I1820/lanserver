@@ -20,6 +20,7 @@ POST	/device					Device.Create
 GET	/device					Device.List
 DELETE	/device/:id				Device.Remove
 POST	/device/:id/push			Device.Push
+GET	/device/:id/refresh			Device.Refresh
 
 # Device Profiles
 POST	/device-profile				DeviceProfile.Create
