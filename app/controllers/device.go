@@ -29,6 +29,10 @@ func (c Device) Create() revel.Result {
 		}
 	}
 
+	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+	// TODO application existance
+	d.Application = aid
+
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -107,9 +111,13 @@ func (c Device) Refresh() revel.Result {
 
 // List lists all devices
 func (c Device) List() revel.Result {
-	var results []bson.M
+	var results = make([]bson.M, 0)
 
-	if err := app.DB.C("device").Find(bson.M{}).All(&results); err != nil {
+	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+
+	if err := app.DB.C("device").Find(bson.M{
+		"application": aid,
+	}).All(&results); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
