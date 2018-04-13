@@ -5,14 +5,19 @@
 LAN server provides a simple and organized way for managing
 devices that are connected using IP technology.
 
+## Revel
 
 ### Start the web server:
 
-   revel run myapp
+```
+revel run myapp
+```
 
 ### Go to http://localhost:9000/ and you'll see:
 
+```
     "It works"
+```
 
 ## Code Layout
 
