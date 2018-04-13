@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,8 +10,8 @@ import (
 	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/revel/revel"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // Device controller controls system devices
@@ -29,7 +30,7 @@ func (c Device) Create() revel.Result {
 		}
 	}
 
-	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+	aid := c.Params.Route.Get("aid")
 	// TODO application existance
 	d.Application = aid
 
@@ -52,7 +53,7 @@ func (c Device) Create() revel.Result {
 
 	d.Token = tokenString
 
-	if err := app.DB.C("device").Insert(d); err != nil {
+	if _, err := app.DB.Collection("device").InsertOne(context.Background(), d); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
@@ -89,13 +90,13 @@ func (c Device) Refresh() revel.Result {
 		}
 	}
 
-	if err := app.DB.C("device").Update(bson.M{
-		"deveui": deveui,
-	}, bson.M{
-		"$set": bson.M{
-			"token": tokenString,
-		},
-	}); err != nil {
+	if _, err := app.DB.Collection("device").UpdateOne(context.Background(), bson.NewDocument(
+		bson.EC.Int64("deveui", deveui),
+	), bson.NewDocument(
+		bson.EC.SubDocument("$set", bson.NewDocument(
+			bson.EC.String("token", tokenString),
+		)),
+	)); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
@@ -111,17 +112,34 @@ func (c Device) Refresh() revel.Result {
 
 // List lists all devices
 func (c Device) List() revel.Result {
-	var results = make([]bson.M, 0)
+	var results = make([]models.Device, 0)
 
-	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+	aid := c.Params.Route.Get("aid")
 
-	if err := app.DB.C("device").Find(bson.M{
-		"application": aid,
-	}).All(&results); err != nil {
+	cur, err := app.DB.Collection("device").Find(context.Background(), bson.NewDocument(
+		bson.EC.String("application", aid),
+	))
+	if err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
 		}
+
+	}
+
+	defer cur.Close(context.Background())
+
+	for cur.Next(context.Background()) {
+		var result models.Device
+
+		if err := cur.Decode(&result); err != nil {
+			c.Response.Status = http.StatusInternalServerError
+			return revel.ErrorResult{
+				Error: err,
+			}
+		}
+
+		results = append(results, result)
 	}
 
 	return c.RenderJSON(results)
@@ -137,9 +155,9 @@ func (c Device) Remove() revel.Result {
 		}
 	}
 
-	if err := app.DB.C("device").Remove(bson.M{
-		"deveui": deveui,
-	}); err != nil {
+	if _, err := app.DB.Collection("device").DeleteOne(context.Background(), bson.NewDocument(
+		bson.EC.Int64("deveui", deveui),
+	)); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
@@ -160,17 +178,18 @@ func (c Device) Push() revel.Result {
 		}
 	}
 
-	var results []bson.M
-
-	if err := app.DB.C("device").Find(bson.M{
-		"deveui": deveui,
-	}).All(&results); err != nil {
+	r := app.DB.Collection("device").FindOne(context.Background(), bson.NewDocument(
+		bson.EC.Int64("deveui", deveui),
+	))
+	var dv models.Device
+	if err := r.Decode(&dv); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
 		}
 	}
-	stoken := results[0]["token"]
+
+	stoken := dv.Token
 
 	var d struct {
 		Token string
