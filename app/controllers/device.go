@@ -156,3 +156,15 @@ func (c Device) Push() revel.Result {
 
 	return c.RenderJSON(token.Claims)
 }
+
+// DeviceProfile controller manages device profiles
+type DeviceProfile struct {
+	*revel.Controller
+}
+
+// Create creates new device profile
+func (c DeviceProfile) Create() revel.Result {
+	var dp models.DeviceProfile
+
+	return c.RenderJSON(dp)
+}
