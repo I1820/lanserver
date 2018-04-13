@@ -1,12 +1,14 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/revel/revel"
 	"github.com/yosssi/gmq/mqtt/client"
 
-	mgo "gopkg.in/mgo.v2"
+	"github.com/mongodb/mongo-go-driver/bson"
+	mgo "github.com/mongodb/mongo-go-driver/mongo"
 )
 
 var (
@@ -22,23 +24,28 @@ var DB *mgo.Database
 
 // InitDB initiates a connection to a database
 func InitDB() {
-	url := revel.Config.StringDefault("db.url", "127.0.0.1")
+	url := revel.Config.StringDefault("db.url", "mongodb://127.0.0.1")
 
-	session, err := mgo.Dial(url)
+	client, err := mgo.NewClient(url)
 	if err != nil {
 		revel.AppLog.Errorf("DB connection error: %s", err)
 		return
 	}
-	DB = session.DB("lanserver")
-	// Optional. Switch the session to a monotonic behavior.
-	session.SetMode(mgo.Monotonic, true)
+	DB = client.Database("lanserver")
 
 	// Device collection
-	cp := DB.C("device")
-	if err := cp.EnsureIndex(mgo.Index{
-		Key:    []string{"deveui"},
-		Unique: true,
-	}); err != nil {
+	cp := DB.Collection("device")
+	if _, err := cp.Indexes().CreateOne(
+		context.Background(),
+		mgo.IndexModel{
+			Keys: bson.NewDocument(
+				bson.EC.Int32("deveui", 1),
+			),
+			Options: bson.NewDocument(
+				bson.EC.Boolean("unique", true),
+			),
+		},
+	); err != nil {
 		revel.AppLog.Errorf("DB ensure index error: %s", err)
 		return
 	}
