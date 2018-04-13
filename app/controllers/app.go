@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/aiotrc/lanserver.sh/app"
 	"github.com/aiotrc/lanserver.sh/app/models"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"github.com/revel/revel"
 )
 
@@ -22,6 +25,16 @@ func (c *App) Create() revel.Result {
 			Error: err,
 		}
 	}
+
+	res, err := app.DB.Collection("application").InsertOne(context.Background(), a)
+	if err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	a.ID = res.InsertedID.(objectid.ObjectID).Hex()
 
 	return c.RenderJSON(a)
 }
