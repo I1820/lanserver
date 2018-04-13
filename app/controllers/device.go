@@ -29,6 +29,10 @@ func (c Device) Create() revel.Result {
 		}
 	}
 
+	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+	// TODO application existance
+	d.Application = aid
+
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -58,11 +62,62 @@ func (c Device) Create() revel.Result {
 	return c.RenderJSON(d)
 }
 
+// Refresh generates new token for given thing
+func (c Device) Refresh() revel.Result {
+	deveui, err := strconv.ParseInt(c.Params.Route.Get("id"), 10, 64)
+	if err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:   "lanserver.sh",
+		Id:       strconv.FormatInt(deveui, 10),
+		IssuedAt: time.Now().Unix(),
+	})
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString(app.Secret)
+	if err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	if err := app.DB.C("device").Update(bson.M{
+		"deveui": deveui,
+	}, bson.M{
+		"$set": bson.M{
+			"token": tokenString,
+		},
+	}); err != nil {
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderJSON(struct {
+		Token string
+	}{
+		Token: tokenString,
+	})
+}
+
 // List lists all devices
 func (c Device) List() revel.Result {
-	var results []bson.M
+	var results = make([]bson.M, 0)
 
-	if err := app.DB.C("device").Find(bson.M{}).All(&results); err != nil {
+	aid, _ := strconv.Atoi(c.Params.Route.Get("aid"))
+
+	if err := app.DB.C("device").Find(bson.M{
+		"application": aid,
+	}).All(&results); err != nil {
 		c.Response.Status = http.StatusInternalServerError
 		return revel.ErrorResult{
 			Error: err,
@@ -155,4 +210,16 @@ func (c Device) Push() revel.Result {
 	}
 
 	return c.RenderJSON(token.Claims)
+}
+
+// DeviceProfile controller manages device profiles
+type DeviceProfile struct {
+	*revel.Controller
+}
+
+// Create creates new device profile
+func (c DeviceProfile) Create() revel.Result {
+	var dp models.DeviceProfile
+
+	return c.RenderJSON(dp)
 }
