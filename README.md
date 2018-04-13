@@ -1,6 +1,9 @@
-# Welcome to Revel
+# lanserver.sh
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/b60be3c9b6333d9321d0)
 
-A high-productivity web framework for the [Go language](http://www.golang.org/).
+## Introduction
+LAN server provides a simple and organized way for managing
+devices that are connected using IP technology.
 
 
 ### Start the web server:
