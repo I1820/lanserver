@@ -34,8 +34,8 @@ func InitDB() {
 	DB = client.Database("lanserver")
 
 	// Device collection
-	cp := DB.Collection("device")
-	if _, err := cp.Indexes().CreateOne(
+	cd := DB.Collection("device")
+	name, err := cd.Indexes().CreateOne(
 		context.Background(),
 		mgo.IndexModel{
 			Keys: bson.NewDocument(
@@ -45,10 +45,12 @@ func InitDB() {
 				bson.EC.Boolean("unique", true),
 			),
 		},
-	); err != nil {
-		revel.AppLog.Errorf("DB ensure index error: %s", err)
+	)
+	if err != nil {
+		revel.AppLog.Errorf("DB [Device Collection] ensure index error: %s", err)
 		return
 	}
+	revel.AppLog.Infof("DB [Device Collection] index: %s", name)
 
 	revel.AppLog.Infof("DB Connected: %s", url)
 }
