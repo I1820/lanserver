@@ -13,4 +13,5 @@ type Device struct {
 
 // DeviceProfile that is a profile for many connected device
 type DeviceProfile struct {
+	Name string
 }
