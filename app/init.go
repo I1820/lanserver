@@ -26,7 +26,7 @@ var DB *mgo.Database
 func InitDB() {
 	url := revel.Config.StringDefault("db.url", "mongodb://127.0.0.1")
 
-	client, err := mgo.NewClient(url)
+	client, err := mgo.Connect(context.Background(), url, nil)
 	if err != nil {
 		revel.AppLog.Errorf("DB connection error: %s", err)
 		return
