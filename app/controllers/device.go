@@ -12,6 +12,7 @@ import (
 	"github.com/aiotrc/lanserver.sh/app/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"github.com/revel/revel"
 )
 
@@ -246,5 +247,5 @@ func (c DeviceProfile) Create() revel.Result {
 		log.Fatal(err)
 	}
 
-	return c.RenderJSON(res.InsertedID)
+	return c.RenderJSON(res.InsertedID.(objectid.ObjectID).Hex())
 }
