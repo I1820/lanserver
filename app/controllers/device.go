@@ -241,6 +241,12 @@ type DeviceProfile struct {
 // Create creates new device profile
 func (c DeviceProfile) Create() revel.Result {
 	var dp models.DeviceProfile
+	if err := c.Params.BindJSON(&dp); err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
 
 	res, err := app.DB.Collection("device-profile").InsertOne(context.Background(), dp)
 	if err != nil {
