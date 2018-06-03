@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -240,5 +241,10 @@ type DeviceProfile struct {
 func (c DeviceProfile) Create() revel.Result {
 	var dp models.DeviceProfile
 
-	return c.RenderJSON(dp)
+	res, err := app.DB.Collection("device-profile").InsertOne(context.Background(), dp)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return c.RenderJSON(res.InsertedID)
 }
