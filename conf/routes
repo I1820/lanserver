@@ -17,7 +17,8 @@ POST	/application/:aid/device		Device.Create
 GET	/application/:aid/device		Device.List
 DELETE	/application/:aid/device/:id		Device.Remove
 POST	/device/:id/push			Device.Push
-GET	/application/:aid/device/:id/refresh	Device.Refresh
+GET	/device/:id/refresh			Device.Refresh
+POST	/device/:id/activate			Device.Activate
 
 # Device Profiles
 POST	/device-profile				DeviceProfile.Create
