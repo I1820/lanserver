@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,6 +14,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/core/option"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/revel/revel"
 )
 
@@ -110,6 +113,53 @@ func (c Device) Refresh() revel.Result {
 	}{
 		Token: tokenString,
 	})
+}
+
+// Activate activates target device with IP address
+func (c Device) Activate() revel.Result {
+	var json struct {
+		DevAddr net.IP
+	}
+
+	if err := c.Params.BindJSON(&json); err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	deveui, err := strconv.ParseInt(c.Params.Route.Get("id"), 10, 64)
+	if err != nil {
+		c.Response.Status = http.StatusBadRequest
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	dr := app.DB.Collection("device").FindOneAndUpdate(context.Background(), bson.NewDocument(
+		bson.EC.Int64("deveui", deveui),
+	), bson.NewDocument(
+		bson.EC.SubDocument("$set", bson.NewDocument(
+			bson.EC.Interface("devaddr", json.DevAddr),
+		)),
+	), mongo.Opt.ReturnDocument(option.After))
+
+	var d models.Device
+
+	if err := dr.Decode(&d); err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.Response.Status = http.StatusNotFound
+			return revel.ErrorResult{
+				Error: fmt.Errorf("Thing %d not found", deveui),
+			}
+		}
+		c.Response.Status = http.StatusInternalServerError
+		return revel.ErrorResult{
+			Error: err,
+		}
+	}
+
+	return c.RenderJSON(d)
 }
 
 // List lists all devices
