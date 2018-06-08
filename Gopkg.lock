@@ -94,13 +94,13 @@
   revision = "9754325054eb35f19f416a914cdd2c5d8cd64eac"
 
 [[projects]]
-  branch = "develop"
   name = "github.com/revel/cmd"
   packages = [
     "harness",
     "revel"
   ]
-  revision = "d2ac0185441137405466f7fb1d3ce6702198ec8d"
+  revision = "97ec1422620f1a83cd13738708a109fe092364ca"
+  version = "v0.19.0"
 
 [[projects]]
   name = "github.com/revel/config"
@@ -115,14 +115,14 @@
   revision = "793412a67da6f8d15fede4c38f5c66272478cb8a"
 
 [[projects]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/revel/modules"
   packages = [
     "static/app/controllers",
     "testrunner/app",
     "testrunner/app/controllers"
   ]
-  revision = "301a4c1241c380924f1cde955476789fafff4b87"
+  revision = "ccd4ced62a26cd9f238dfe9454f16c644378c5c8"
 
 [[projects]]
   branch = "master"
@@ -131,14 +131,14 @@
   revision = "41257a1839e945fce74afd070e02bab2ea2c776a"
 
 [[projects]]
-  branch = "develop"
   name = "github.com/revel/revel"
   packages = [
     ".",
     "logger",
     "testing"
   ]
-  revision = "ec3e7658a50981ef8289707180c71453a685d26b"
+  revision = "248166bf840eab87a88d1c18309f8e174e8327ff"
+  version = "v0.19.1"
 
 [[projects]]
   branch = "master"
@@ -184,11 +184,10 @@
   revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
 
 [[projects]]
-  name = "gopkg.in/fsnotify.v1"
+  name = "gopkg.in/fsnotify/fsnotify.v1"
   packages = ["."]
-  revision = "26b17cd591df34e7b1cf0087f48fc19ca67eb476"
-  source = "https://github.com/fsnotify/fsnotify.git"
-  version = "v1.4.0"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
 
 [[projects]]
   name = "gopkg.in/natefinch/lumberjack.v2"
@@ -205,6 +204,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d42362a443eb6255fd3616d511b78f5760348102457f4e3e8e97b502e4a1505d"
+  inputs-digest = "72c9e603fc9474ad92ed83b9e1b9cf9ab8772223c5c20e85af3c2ae3904154de"
   solver-name = "gps-cdcl"
   solver-version = 1

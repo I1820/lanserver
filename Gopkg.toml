@@ -26,15 +26,15 @@
 required = ["github.com/revel/cmd/revel"]
 
 [[override]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/revel/modules"
 
 [[override]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/revel/revel"
 
 [[override]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/revel/cmd"
 
 [[override]]
@@ -42,7 +42,7 @@ required = ["github.com/revel/cmd/revel"]
   name = "github.com/revel/log15"
 
 [[override]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/revel/cron"
 
 [[override]]
@@ -69,3 +69,6 @@ required = ["github.com/revel/cmd/revel"]
 [prune]
   go-tests = true
   unused-packages = true
+  [[prune.project]]
+    name = "github.com/revel/revel"
+    unused-packages = false
