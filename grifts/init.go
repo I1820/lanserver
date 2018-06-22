@@ -1,7 +1,7 @@
 package grifts
 
 import (
-	"github.com/aiotrc/lanserver_sh/actions"
+	"github.com/aiotrc/lanserver/actions"
 	"github.com/gobuffalo/buffalo"
 )
 
