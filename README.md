@@ -1,51 +1,21 @@
-# lanserver.sh
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/b60be3c9b6333d9321d0)
+# Welcome to Buffalo!
 
-## Introduction
-LAN server provides a simple and organized way for managing
-devices that are connected using IP technology.
+Thank you for choosing Buffalo for your web development needs.
 
-## Revel
+## Starting the Application
 
-### Start the web server:
+Buffalo ships with a command that will watch your application and automatically rebuild the Go binary and any assets for you. To do that run the "buffalo dev" command:
 
-```
-revel run myapp
-```
+	$ buffalo dev
 
-### Go to http://localhost:9000/ and you'll see:
+If you point your browser to [http://127.0.0.1:3000](http://127.0.0.1:3000) you should see a "Welcome to Buffalo!" page.
 
-```
-    "It works"
-```
+**Congratulations!** You now have your Buffalo application up and running.
 
-## Code Layout
+## What Next?
 
-The directory structure of a generated Revel application:
+We recommend you heading over to [http://gobuffalo.io](http://gobuffalo.io) and reviewing all of the great documentation there.
 
-    conf/             Configuration directory
-        app.conf      Main app configuration file
-        routes        Routes definition file
+Good luck!
 
-    app/              App sources
-        init.go       Interceptor registration
-        controllers/  App controllers go here
-        views/        Templates directory
-
-    messages/         Message files
-
-    public/           Public static assets
-        css/          CSS files
-        js/           Javascript files
-        images/       Image files
-
-    tests/            Test suites
-
-
-## Help
-
-* The [Getting Started with Revel](http://revel.github.io/tutorial/gettingstarted.html).
-* The [Revel guides](http://revel.github.io/manual/index.html).
-* The [Revel sample apps](http://revel.github.io/examples/index.html).
-* The [API documentation](https://godoc.org/github.com/revel/revel).
-
+[Powered by Buffalo](http://gobuffalo.io)
