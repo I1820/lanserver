@@ -6,7 +6,7 @@ import "net"
 type Device struct {
 	Name        string
 	DevEUI      int64  // System wide identification
-	DevAddr     net.IP // network wide identification
+	IP          net.IP // network wide identification
 	Token       string // Device JWT token
 	Application string // Application ID
 }
