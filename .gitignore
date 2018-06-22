@@ -8,7 +8,7 @@ node_modules/
 .sass-cache/
 *-packr.go
 public/assets/
-lanserver_sh
+lanserver
 .vscode/
 .grifter/
 .env
