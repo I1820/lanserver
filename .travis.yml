@@ -1,0 +1,27 @@
+language: go
+
+go: 1.9
+
+env:
+  - GO_ENV=test
+
+services:
+  - mongodb
+
+go_import_path: github.com/aiotrc/lanserver
+
+before_install:
+  - PKGS=$(go list ./... ) # All the import paths
+  - go get -u github.com/golang/dep/cmd/dep # go dep
+  - go get -u github.com/golang/lint/golint # linter
+  - go get -u github.com/kisielk/errcheck   # errcheck checks that you checked errors.
+
+install:
+  - go get github.com/gobuffalo/buffalo/buffalo
+  - dep ensure
+
+script:
+  - go vet -v $PKGS                   # go vet is the official Go static analyzer
+  - errcheck -verbose $PKGS           # Check for unchecked errors
+  - golint -set_exit_status $PKGS     # One last linter
+  - buffalo test
