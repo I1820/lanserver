@@ -57,12 +57,16 @@ func (v DevicesResource) Show(c buffalo.Context) error {
 	return c.Render(200, r.JSON(d))
 }
 
-// New default implementation.
+// New renders the form for creating a new device.
+// This function is mapped to the path GET /devices/new
 func (v DevicesResource) New(c buffalo.Context) error {
-	return c.Render(200, r.String("Device#New"))
+	var d models.Device
+
+	return c.Render(200, r.JSON(d))
 }
 
-// Create default implementation.
+// Create adds a device to the DB. This function is mapped to the
+// path POST /devices
 func (v DevicesResource) Create(c buffalo.Context) error {
 	var d models.Device
 
@@ -96,17 +100,40 @@ func (v DevicesResource) Create(c buffalo.Context) error {
 	return c.Render(200, r.JSON(d))
 }
 
-// Edit default implementation.
+// Edit renders a edit formular for a device. This function is
+// mapped to the path GET /deivce/{device_id}/edit
 func (v DevicesResource) Edit(c buffalo.Context) error {
-	return c.Render(200, r.String("Device#Edit"))
+	var d models.Device
+
+	result := db.Collection("devices").FindOne(c, bson.NewDocument(
+		bson.EC.String("deveui", c.Param("device_id")),
+	))
+
+	if err := result.Decode(&d); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	return c.Render(200, r.JSON(d))
 }
 
-// Update default implementation.
+// Update changes a device in the DB. This function is mapped to
+// the path PUT /devices/{device_id}
 func (v DevicesResource) Update(c buffalo.Context) error {
 	return c.Render(200, r.String("Device#Update"))
 }
 
-// Destroy default implementation.
+// Destroy deletes a device from the DB. This function is mapped
+// to the path DELETE /devices/{device_id}
 func (v DevicesResource) Destroy(c buffalo.Context) error {
-	return c.Render(200, r.String("Device#Destroy"))
+	var d models.Device
+
+	result := db.Collection("devices").FindOneAndDelete(c, bson.NewDocument(
+		bson.EC.String("deveui", c.Param("device_id")),
+	))
+
+	if err := result.Decode(&d); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	return c.Render(200, r.JSON(d))
 }
