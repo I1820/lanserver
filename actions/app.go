@@ -26,7 +26,8 @@ var db *mgo.Database
 func App() *buffalo.App {
 	if app == nil {
 		app = buffalo.New(buffalo.Options{
-			Host:         "0.0.0.0",
+			// ADDR env
+			// PORT env
 			Env:          ENV,
 			SessionStore: sessions.Null{},
 			PreWares: []buffalo.PreWare{
