@@ -1,7 +1,10 @@
 package actions
 
 import (
+	"fmt"
+	"net"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/aiotrc/lanserver/models"
@@ -10,6 +13,15 @@ import (
 	"github.com/gobuffalo/envy"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
+
+var devEUIRegexp *regexp.Regexp
+
+func init() {
+	rg, err := regexp.Compile("[0-9a-fA-F]{16}")
+	if err == nil {
+		devEUIRegexp = rg
+	}
+}
 
 // DevicesResource manages system devices
 type DevicesResource struct {
@@ -60,20 +72,35 @@ func (v DevicesResource) Show(c buffalo.Context) error {
 // New renders the form for creating a new device.
 // This function is mapped to the path GET /devices/new
 func (v DevicesResource) New(c buffalo.Context) error {
-	var d models.Device
+	var rq struct {
+		Name   string `json:"name"`
+		DevEUI string `json:"devEUI"`
+		IP     string `json:"ip"`
+	}
 
-	return c.Render(200, r.JSON(d))
+	return c.Render(200, r.JSON(rq))
 }
 
 // Create adds a device to the DB. This function is mapped to the
 // path POST /devices
 func (v DevicesResource) Create(c buffalo.Context) error {
 	var d models.Device
+	var rq struct {
+		Name   string `json:"name"`
+		DevEUI string `json:"devEUI"`
+		IP     string `json:"ip"`
+	}
 
-	if err := c.Bind(&d); err != nil {
+	if err := c.Bind(&rq); err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
-	// TODO corrects IP address
+	d.Name = rq.Name
+	if d.IP = net.ParseIP(rq.IP); d.IP == nil {
+		return c.Error(http.StatusBadRequest, fmt.Errorf("Invalid ip address: %s", rq.IP))
+	}
+	if d.DevEUI = rq.DevEUI; !devEUIRegexp.MatchString(rq.DevEUI) {
+		return c.Error(http.StatusBadRequest, fmt.Errorf("Invalid DevEUI: %s", rq.DevEUI))
+	}
 
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
