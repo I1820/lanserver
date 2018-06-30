@@ -62,7 +62,8 @@ func App() *buffalo.App {
 		app.GET("/", HomeHandler)
 		g := app.Group("/api")
 		{
-			g.Resource("/devices", DevicesResource{})
+			dr := DevicesResource{}
+			g.Resource("/devices", dr)
 		}
 	}
 
