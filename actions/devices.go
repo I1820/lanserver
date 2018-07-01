@@ -129,7 +129,7 @@ func (v DevicesResource) Create(c buffalo.Context) error {
 }
 
 // Edit renders a edit formular for a device. This function is
-// mapped to the path GET /deivce/{device_id}/edit
+// mapped to the path GET /deivces/{device_id}/edit
 func (v DevicesResource) Edit(c buffalo.Context) error {
 	var d models.Device
 
@@ -188,7 +188,7 @@ func (v DevicesResource) Refresh(c buffalo.Context) error {
 		return c.Error(http.StatusInternalServerError, err)
 	}
 
-	if _, err := db.Collection("device").UpdateOne(context.Background(), bson.NewDocument(
+	if _, err := db.Collection("devices").UpdateOne(context.Background(), bson.NewDocument(
 		bson.EC.String("deveui", deveui),
 	), bson.NewDocument(
 		bson.EC.SubDocument("$set", bson.NewDocument(
@@ -203,4 +203,50 @@ func (v DevicesResource) Refresh(c buffalo.Context) error {
 	}{
 		Token: tokenString,
 	}))
+}
+
+// Push provides data gathering endpoint for devices. This function is mapped to
+// the path POST /devices/{device_id}/push
+func (v DevicesResource) Push(c buffalo.Context) error {
+	deveui := c.Param("device_id")
+
+	result := db.Collection("devices").FindOne(context.Background(), bson.NewDocument(
+		bson.EC.String("deveui", deveui),
+	))
+	var d models.Device
+	if err := result.Decode(&d); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	var rq struct {
+		Token string `json:"token"`
+		Data  []byte `json:"data"`
+	}
+
+	if err := c.Bind(&rq); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+
+	if rq.Token != d.Token {
+		return c.Error(http.StatusForbidden, fmt.Errorf("Mismatched token"))
+	}
+
+	var key []byte
+	copy(key[:], envy.Get("SESSION_SECRET", ""))
+	token, err := jwt.ParseWithClaims(d.Token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		c := token.Claims.(*jwt.StandardClaims)
+
+		if !c.VerifyIssuer("lanserver.sh", true) {
+			return nil, fmt.Errorf("Unexpected issuer %v", c.Issuer)
+		}
+		if c.Id != deveui {
+			return nil, fmt.Errorf("Mismatched identifier %s != %s", c.Id, deveui)
+		}
+		return key, nil
+	})
+	if err != nil {
+		return c.Error(http.StatusForbidden, err)
+	}
+
+	return c.Render(200, r.JSON(token.Claims))
 }
