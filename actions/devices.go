@@ -147,6 +147,7 @@ func (v DevicesResource) Edit(c buffalo.Context) error {
 // Update changes a device in the DB. This function is mapped to
 // the path PUT /devices/{device_id}
 func (v DevicesResource) Update(c buffalo.Context) error {
+	//TODO
 	return c.Render(200, r.String("Device#Update"))
 }
 
