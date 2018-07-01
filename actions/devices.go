@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -163,4 +164,42 @@ func (v DevicesResource) Destroy(c buffalo.Context) error {
 	}
 
 	return c.Render(200, r.JSON(d))
+}
+
+// Refresh creates new device token. This function is mapped to
+// the path GET /devices/{device_id}/refresh
+func (v DevicesResource) Refresh(c buffalo.Context) error {
+	deveui := c.Param("device_id")
+
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:   "lanserver.sh",
+		Id:       deveui,
+		IssuedAt: time.Now().Unix(),
+	})
+
+	// Sign and get the complete encoded token as a string using the secret
+	var key []byte
+	copy(key[:], envy.Get("SESSION_SECRET", ""))
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	if _, err := db.Collection("device").UpdateOne(context.Background(), bson.NewDocument(
+		bson.EC.String("deveui", deveui),
+	), bson.NewDocument(
+		bson.EC.SubDocument("$set", bson.NewDocument(
+			bson.EC.String("token", tokenString),
+		)),
+	)); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	return c.Render(200, r.JSON(struct {
+		Token string `json:"token"`
+	}{
+		Token: tokenString,
+	}))
 }

@@ -64,6 +64,7 @@ func App() *buffalo.App {
 		{
 			dr := DevicesResource{}
 			g.Resource("/devices", dr)
+			g.GET("/devices/{device_id}/refresh", dr.Refresh)
 		}
 	}
 
