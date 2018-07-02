@@ -17,6 +17,12 @@ import (
 
 var devEUIRegexp *regexp.Regexp
 
+type deviceReq struct {
+	Name   string `json:"name"`
+	DevEUI string `json:"devEUI"`
+	IP     string `json:"ip"`
+}
+
 func init() {
 	rg, err := regexp.Compile("[0-9a-fA-F]{16}")
 	if err == nil {
@@ -73,11 +79,7 @@ func (v DevicesResource) Show(c buffalo.Context) error {
 // New renders the form for creating a new device.
 // This function is mapped to the path GET /devices/new
 func (v DevicesResource) New(c buffalo.Context) error {
-	var rq struct {
-		Name   string `json:"name"`
-		DevEUI string `json:"devEUI"`
-		IP     string `json:"ip"`
-	}
+	var rq deviceReq
 
 	return c.Render(200, r.JSON(rq))
 }
@@ -86,11 +88,7 @@ func (v DevicesResource) New(c buffalo.Context) error {
 // path POST /devices
 func (v DevicesResource) Create(c buffalo.Context) error {
 	var d models.Device
-	var rq struct {
-		Name   string `json:"name"`
-		DevEUI string `json:"devEUI"`
-		IP     string `json:"ip"`
-	}
+	var rq deviceReq
 
 	if err := c.Bind(&rq); err != nil {
 		return c.Error(http.StatusBadRequest, err)
