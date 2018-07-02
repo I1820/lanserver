@@ -59,7 +59,7 @@ func App() *buffalo.App {
 			app.Use(middleware.ParameterLogger)
 		}
 
-		app.GET("/", HomeHandler)
+		app.GET("/about", AboutHandler)
 		g := app.Group("/api")
 		{
 			dr := DevicesResource{}
