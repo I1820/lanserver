@@ -8,14 +8,14 @@ func (as *ActionSuite) Test_DevicesResource_Create() {
 		DevEUI: "0000000000000073",
 		IP:     "192.168.73.10",
 	})
-	as.Equal(200, res.Code)
+	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
 }
 
 func (as *ActionSuite) Test_DevicesResource_List() {
 	var dl []models.Device
 
 	res := as.JSON("/api/devices").Get()
-	as.Equal(200, res.Code)
+	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
 	res.Bind(&dl)
 }
 
@@ -23,7 +23,7 @@ func (as *ActionSuite) Test_DevicesResource_Show() {
 	var d models.Device
 
 	res := as.JSON("/api/devices/%s", "0000000000000073").Get()
-	as.Equal(200, res.Code)
+	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
 
 	res.Bind(&d)
 }
@@ -42,5 +42,5 @@ func (as *ActionSuite) Test_DevicesResource_Update() {
 
 func (as *ActionSuite) Test_DevicesResource_Destroy() {
 	res := as.JSON("/api/devices/%s", "0000000000000073").Delete()
-	as.Equal(200, res.Code)
+	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
 }
