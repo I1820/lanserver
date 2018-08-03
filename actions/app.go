@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 
+	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
@@ -19,6 +20,7 @@ import (
 var ENV = envy.Get("GO_ENV", "development")
 var app *buffalo.App
 var db *mgo.Database
+var mqtt paho.Client
 
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
@@ -63,6 +65,14 @@ func App() *buffalo.App {
 			buffalo.NewLogger("fatal").Fatalf("DB connection error: %s", err)
 		}
 		db = client.Database("lanserver")
+
+		// Create mqtt client and connect into broker
+		opts := paho.NewClientOptions()
+		opts.AddBroker(envy.Get("BROKER_URL", "tcp://127.0.0.1:1883"))
+		mqtt = paho.NewClient(opts)
+		if t := mqtt.Connect(); t.Error() != nil {
+			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
+		}
 
 		if ENV == "development" {
 			app.Use(middleware.ParameterLogger)
