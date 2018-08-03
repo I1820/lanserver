@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -245,6 +246,15 @@ func (v DevicesResource) Push(c buffalo.Context) error {
 	if err != nil {
 		return c.Error(http.StatusForbidden, err)
 	}
+
+	b, err := json.Marshal(models.RxMessage{
+		DevEUI: deveui,
+		Data:   rq.Data,
+	})
+	if err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+	mqtt.Publish(fmt.Sprintf("device/%s", deveui), 0, true, b)
 
 	return c.Render(200, r.JSON(token.Claims))
 }
