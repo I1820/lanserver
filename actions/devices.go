@@ -254,7 +254,7 @@ func (v DevicesResource) Push(c buffalo.Context) error {
 	if err != nil {
 		return c.Error(http.StatusInternalServerError, err)
 	}
-	mqtt.Publish(fmt.Sprintf("device/%s", deveui), 0, true, b)
+	mqtt.Publish(fmt.Sprintf("device/%s/rx", deveui), 0, true, b)
 
 	return c.Render(200, r.JSON(token.Claims))
 }
