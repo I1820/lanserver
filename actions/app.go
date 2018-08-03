@@ -70,7 +70,7 @@ func App() *buffalo.App {
 		opts := paho.NewClientOptions()
 		opts.AddBroker(envy.Get("BROKER_URL", "tcp://127.0.0.1:1883"))
 		mqtt = paho.NewClient(opts)
-		if t := mqtt.Connect(); t.Error() != nil {
+		if t := mqtt.Connect(); t.Wait() && t.Error() != nil {
 			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
 		}
 
