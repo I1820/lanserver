@@ -2,16 +2,14 @@
 # https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 FROM gobuffalo/buffalo:v0.11.1 as builder
 
-RUN mkdir -p $GOPATH/src/github.com/aiotrc/lanserver_sh
-WORKDIR $GOPATH/src/github.com/aiotrc/lanserver_sh
+RUN mkdir -p "$GOPATH/src/github.com/I1820/lanserver"
+WORKDIR $GOPATH/src/github.com/I1820/lanserver
 
-ADD . .
+COPY . .
 RUN dep ensure
 RUN buffalo build --static -o /bin/app
 
-FROM alpine
-RUN apk add --no-cache bash
-RUN apk add --no-cache ca-certificates
+FROM alpine:latest
 
 WORKDIR /bin/
 
@@ -23,8 +21,14 @@ COPY --from=builder /bin/app .
 # Bind the app to 0.0.0.0 so it can be seen from outside the container
 ENV ADDR=0.0.0.0
 
-EXPOSE 3000
+EXPOSE 4000
+
+# Metadata
+LABEL maintainer="Parham Alvani <parham.alvani@gmail.com>"
+LABEL org.i1820.build-date=$BUILD_DATE
+LABEL org.i1820.build-commit-sha=$BUILD_COMMIT
+LABEL org.i1820.build-commit-msg=$BUILD_COMMIT_MSG
 
 # Comment out to run the migrations before running the binary:
 # CMD /bin/app migrate; /bin/app
-CMD exec /bin/app
+CMD ["/bin/app"]
