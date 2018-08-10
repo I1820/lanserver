@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aiotrc/lanserver/models"
+	"github.com/I1820/lanserver/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"

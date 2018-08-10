@@ -1,6 +1,6 @@
 package actions
 
-import "github.com/aiotrc/lanserver/models"
+import "github.com/I1820/lanserver/models"
 
 func (as *ActionSuite) Test_DevicesResource_Create() {
 	res := as.JSON("/api/devices").Post(deviceReq{
@@ -26,18 +26,6 @@ func (as *ActionSuite) Test_DevicesResource_Show() {
 	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
 
 	res.Bind(&d)
-}
-
-func (as *ActionSuite) Test_DevicesResource_New() {
-	as.Fail("Not Implemented!")
-}
-
-func (as *ActionSuite) Test_DevicesResource_Edit() {
-	as.Fail("Not Implemented!")
-}
-
-func (as *ActionSuite) Test_DevicesResource_Update() {
-	as.Fail("Not Implemented!")
 }
 
 func (as *ActionSuite) Test_DevicesResource_Destroy() {
