@@ -2,7 +2,6 @@ package actions
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -202,59 +201,4 @@ func (v DevicesResource) Refresh(c buffalo.Context) error {
 	}{
 		Token: tokenString,
 	}))
-}
-
-// Push provides data gathering endpoint for devices. This function is mapped to
-// the path POST /devices/{device_id}/push
-func (v DevicesResource) Push(c buffalo.Context) error {
-	deveui := c.Param("device_id")
-
-	result := db.Collection("devices").FindOne(context.Background(), bson.NewDocument(
-		bson.EC.String("deveui", deveui),
-	))
-	var d models.Device
-	if err := result.Decode(&d); err != nil {
-		return c.Error(http.StatusInternalServerError, err)
-	}
-
-	var rq struct {
-		Token string `json:"token"`
-		Data  []byte `json:"data"`
-	}
-
-	if err := c.Bind(&rq); err != nil {
-		return c.Error(http.StatusBadRequest, err)
-	}
-
-	if rq.Token != d.Token {
-		return c.Error(http.StatusForbidden, fmt.Errorf("Mismatched token"))
-	}
-
-	var key []byte
-	copy(key[:], envy.Get("SESSION_SECRET", ""))
-	token, err := jwt.ParseWithClaims(d.Token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		c := token.Claims.(*jwt.StandardClaims)
-
-		if !c.VerifyIssuer("lanserver.sh", true) {
-			return nil, fmt.Errorf("Unexpected issuer %v", c.Issuer)
-		}
-		if c.Id != deveui {
-			return nil, fmt.Errorf("Mismatched identifier %s != %s", c.Id, deveui)
-		}
-		return key, nil
-	})
-	if err != nil {
-		return c.Error(http.StatusForbidden, err)
-	}
-
-	b, err := json.Marshal(models.RxMessage{
-		DevEUI: deveui,
-		Data:   rq.Data,
-	})
-	if err != nil {
-		return c.Error(http.StatusInternalServerError, err)
-	}
-	mqtt.Publish(fmt.Sprintf("device/%s/rx", deveui), 0, true, b)
-
-	return c.Render(200, r.JSON(token.Claims))
 }
