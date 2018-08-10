@@ -20,7 +20,10 @@ import (
 var ENV = envy.Get("GO_ENV", "development")
 var app *buffalo.App
 var db *mgo.Database
-var mqtt paho.Client
+var mqttApplication paho.Client
+var mqttNode paho.Client
+
+var logger buffalo.Logger
 
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
@@ -55,24 +58,8 @@ func App() *buffalo.App {
 			}
 		})
 
-		// Create mongodb connection
-		url := envy.Get("DB_URL", "mongodb://127.0.0.1")
-		client, err := mgo.NewClient(url)
-		if err != nil {
-			buffalo.NewLogger("fatal").Fatalf("DB new client error: %s", err)
-		}
-		if err := client.Connect(context.Background()); err != nil {
-			buffalo.NewLogger("fatal").Fatalf("DB connection error: %s", err)
-		}
-		db = client.Database("lanserver")
-
-		// Create mqtt client and connect into broker
-		opts := paho.NewClientOptions()
-		opts.AddBroker(envy.Get("BROKER_URL", "tcp://127.0.0.1:1883"))
-		mqtt = paho.NewClient(opts)
-		if t := mqtt.Connect(); t.Wait() && t.Error() != nil {
-			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
-		}
+		createMongodbClient()
+		createMqttClient()
 
 		if ENV == "development" {
 			app.Use(middleware.ParameterLogger)
@@ -88,4 +75,42 @@ func App() *buffalo.App {
 	}
 
 	return app
+}
+
+// createMongodbClient creates mongodb connection
+func createMongodbClient() {
+	url := envy.Get("DB_URL", "mongodb://127.0.0.1")
+	client, err := mgo.NewClient(url)
+	if err != nil {
+		buffalo.NewLogger("fatal").Fatalf("DB new client error: %s", err)
+	}
+	if err := client.Connect(context.Background()); err != nil {
+		buffalo.NewLogger("fatal").Fatalf("DB connection error: %s", err)
+	}
+	db = client.Database("lanserver")
+}
+
+// createMqttClient creates mqtt client and connect into broker
+func createMqttClient() {
+	// Application side mqtt
+	{
+		opts := paho.NewClientOptions()
+		opts.AddBroker(envy.Get("APPLICATION_BROKER_URL", "tcp://127.0.0.1:1883"))
+		mqttApplication = paho.NewClient(opts)
+		if t := mqttApplication.Connect(); t.Wait() && t.Error() != nil {
+			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
+		}
+		mqttApplication.Subscribe("/device/+/tx", 0, Notification)
+	}
+
+	// Node side mqtt
+	{
+		opts := paho.NewClientOptions()
+		opts.AddBroker(envy.Get("NODE_BROKER_URL", "tcp://127.0.0.1:1883"))
+		mqttNode = paho.NewClient(opts)
+		if t := mqttNode.Connect(); t.Wait() && t.Error() != nil {
+			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
+		}
+		mqttApplication.Subscribe("/log/+/send", 0, Log)
+	}
 }
