@@ -1,4 +1,6 @@
 # Lanserver.sh
+[![Travis branch](https://img.shields.io/travis/I1820/lanserver/master.svg?style=flat-square)](https://travis-ci.org/I1820/lanserver)
+[![Go Report](https://goreportcard.com/badge/github.com/I1820/lanserver?style=flat-square)](https://goreportcard.com/report/github.com/I1820/lanserver)
 [![Buffalo](https://img.shields.io/badge/powered%20by-buffalo-blue.svg?style=flat-square)](http://gobuffalo.io)
 [![Maintainability](https://api.codeclimate.com/v1/badges/5db031209d82d7354ae0/maintainability)](https://codeclimate.com/github/I1820/lanserver/maintainability)
 
