@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/I1820/lanserver/models"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -15,28 +16,30 @@ import (
 // Log provides data gathering endpoint for devices.
 // we call these data that are came from devices log
 // from kaa old days.
+// log/{deveui}/send
 func Log(client paho.Client, message paho.Message) {
-	var deveui string
-	fmt.Sscanf(message.Topic(), "/log/%s/send", &deveui)
+	deveui := strings.Split(message.Topic(), "/")[1]
+
+	logger.Infof("Device: %s /log/send", deveui)
 
 	result := db.Collection("devices").FindOne(context.Background(), bson.NewDocument(
 		bson.EC.String("deveui", deveui),
 	))
 	var d models.Device
 	if err := result.Decode(&d); err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusInternalServerError, err)
 	}
 
 	var log models.LogMessage
 	if err := json.Unmarshal(message.Payload(), &log); err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusBadRequest, err)
 	}
 
 	if log.Token != d.Token {
+		logger.Error(fmt.Errorf("Mismatched token"))
 		return
-		// return c.Error(http.StatusForbidden, fmt.Errorf("Mismatched token"))
 	}
 
 	var key []byte
@@ -52,8 +55,8 @@ func Log(client paho.Client, message paho.Message) {
 		}
 		return key, nil
 	}); err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusForbidden, err)
 	}
 
 	b, err := json.Marshal(models.RxMessage{
@@ -61,8 +64,8 @@ func Log(client paho.Client, message paho.Message) {
 		Data:   log.Data,
 	})
 	if err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusInternalServerError, err)
 	}
 	mqttApplication.Publish(fmt.Sprintf("device/%s/rx", deveui), 0, true, b)
 }
@@ -70,22 +73,22 @@ func Log(client paho.Client, message paho.Message) {
 // Notification provides data sending endpoint for devices.
 // we call these data that are sent to devices notification
 // from kaa old days.
+// device/{deveui}/tx
 func Notification(client paho.Client, message paho.Message) {
-	var deveui string
-	fmt.Sscanf(message.Topic(), "/device/%s/tx", &deveui)
+	deveui := strings.Split(message.Topic(), "/")[1]
 
 	var notification models.TxMessage
 	if err := json.Unmarshal(message.Payload(), &notification); err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusBadRequest, err)
 	}
 
 	b, err := json.Marshal(models.NotificationMessage{
 		Data: notification.Data,
 	})
 	if err != nil {
+		logger.Error(err)
 		return
-		// return c.Error(http.StatusInternalServerError, err)
 	}
 	mqttNode.Publish(fmt.Sprintf("notification/%s/request", deveui), 0, true, b)
 }
