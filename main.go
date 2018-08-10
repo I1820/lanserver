@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/aiotrc/lanserver/actions"
+	"github.com/I1820/lanserver/actions"
 )
 
 func main() {
