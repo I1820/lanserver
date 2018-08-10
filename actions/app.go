@@ -30,6 +30,8 @@ var logger buffalo.Logger
 // application.
 func App() *buffalo.App {
 	if app == nil {
+		logger = buffalo.NewLogger("info")
+
 		app = buffalo.New(buffalo.Options{
 			// ADDR env
 			// PORT env
@@ -73,7 +75,6 @@ func App() *buffalo.App {
 			g.GET("/devices/{device_id}/refresh", dr.Refresh)
 		}
 	}
-
 	return app
 }
 
@@ -96,21 +97,35 @@ func createMqttClient() {
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(envy.Get("APPLICATION_BROKER_URL", "tcp://127.0.0.1:1883"))
+		opts.SetConnectionLostHandler(func(client paho.Client, err error) {
+			logger.Errorf("mqtt connection lost error: %s", err)
+		})
+		opts.SetOrderMatters(false)
+
 		mqttApplication = paho.NewClient(opts)
 		if t := mqttApplication.Connect(); t.Wait() && t.Error() != nil {
-			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
+			logger.Fatalf("MQTT session error: %s", t.Error())
 		}
-		mqttApplication.Subscribe("/device/+/tx", 0, Notification)
+		if t := mqttApplication.Subscribe("device/+/tx", 0, Notification); t.Wait() && t.Error() != nil {
+			logger.Fatalf("MQTT subscription error: %s", t.Error())
+		}
 	}
 
 	// Node side mqtt
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(envy.Get("NODE_BROKER_URL", "tcp://127.0.0.1:1883"))
+		opts.SetConnectionLostHandler(func(client paho.Client, err error) {
+			logger.Errorf("mqtt connection lost error: %s", err)
+		})
+		opts.SetOrderMatters(false)
+
 		mqttNode = paho.NewClient(opts)
 		if t := mqttNode.Connect(); t.Wait() && t.Error() != nil {
-			buffalo.NewLogger("fatal").Fatalf("MQTT session error: %s", t.Error())
+			logger.Fatalf("MQTT session error: %s", t.Error())
 		}
-		mqttApplication.Subscribe("/log/+/send", 0, Log)
+		if t := mqttNode.Subscribe("log/+/send", 0, Log); t.Wait() && t.Error() != nil {
+			logger.Fatalf("MQTT subscription error: %s", t.Error())
+		}
 	}
 }
