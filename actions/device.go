@@ -45,8 +45,6 @@ func (v DevicesResource) List(c buffalo.Context) error {
 		return c.Error(http.StatusInternalServerError, err)
 	}
 
-	defer cur.Close(c)
-
 	for cur.Next(c) {
 		var result models.Device
 
@@ -55,6 +53,9 @@ func (v DevicesResource) List(c buffalo.Context) error {
 		}
 
 		results = append(results, result)
+	}
+	if err := cur.Close(c); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
 	}
 
 	return c.Render(200, r.JSON(results))
