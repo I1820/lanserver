@@ -7,14 +7,22 @@ env:
 
 services:
   - mongodb
+  - docker
 
 go_import_path: github.com/I1820/lanserver
 
 before_install:
   - PKGS=$(go list ./... ) # All the import paths
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh # go dep
-  - go get -u github.com/golang/lint/golint # linter
-  - go get -u github.com/kisielk/errcheck   # errcheck checks that you checked errors.
+
+  # setup dependency management tool
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+  # install linters
+  - go get -u github.com/golang/lint/golint
+  - go get -u github.com/kisielk/errcheck
+
+  # docker services
+  - docker run -d -p 1883:1883 eclipse-mosquitto
 
 install:
   - go get github.com/gobuffalo/buffalo/buffalo
