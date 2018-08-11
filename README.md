@@ -7,4 +7,5 @@
 ## Introduction
 
 Implementation of Ad-hoc standard for managing Ethernet based things similar to LoRa specification.
-It uses JWT Tokens for device validation.
+It uses JWT Tokens for device validation on uplink. devices send uplink and receive downlink via mqtt
+protocol. Lanserver provides two interface for application: HTTP for management and MQTT for data.
