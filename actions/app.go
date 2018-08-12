@@ -97,17 +97,16 @@ func createMqttClient() {
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(envy.Get("APPLICATION_BROKER_URL", "tcp://127.0.0.1:1883"))
-		opts.SetConnectionLostHandler(func(client paho.Client, err error) {
-			logger.Errorf("mqtt connection lost error: %s", err)
-		})
 		opts.SetOrderMatters(false)
+		opts.SetOnConnectHandler(func(client paho.Client) {
+			if t := client.Subscribe("device/+/tx", 0, Notification); t.Wait() && t.Error() != nil {
+				logger.Fatalf("MQTT subscription error: %s", t.Error())
+			}
+		})
 
 		mqttApplication = paho.NewClient(opts)
 		if t := mqttApplication.Connect(); t.Wait() && t.Error() != nil {
 			logger.Fatalf("MQTT session error: %s", t.Error())
-		}
-		if t := mqttApplication.Subscribe("device/+/tx", 0, Notification); t.Wait() && t.Error() != nil {
-			logger.Fatalf("MQTT subscription error: %s", t.Error())
 		}
 	}
 
@@ -115,17 +114,16 @@ func createMqttClient() {
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(envy.Get("NODE_BROKER_URL", "tcp://127.0.0.1:1883"))
-		opts.SetConnectionLostHandler(func(client paho.Client, err error) {
-			logger.Errorf("mqtt connection lost error: %s", err)
-		})
 		opts.SetOrderMatters(false)
+		opts.SetOnConnectHandler(func(client paho.Client) {
+			if t := client.Subscribe("log/+/send", 0, Log); t.Wait() && t.Error() != nil {
+				logger.Fatalf("MQTT subscription error: %s", t.Error())
+			}
+		})
 
 		mqttNode = paho.NewClient(opts)
 		if t := mqttNode.Connect(); t.Wait() && t.Error() != nil {
 			logger.Fatalf("MQTT session error: %s", t.Error())
-		}
-		if t := mqttNode.Subscribe("log/+/send", 0, Log); t.Wait() && t.Error() != nil {
-			logger.Fatalf("MQTT subscription error: %s", t.Error())
 		}
 	}
 }
