@@ -2,7 +2,7 @@
 [![Travis branch](https://img.shields.io/travis/com/I1820/lanserver/master.svg?style=flat-square)](https://travis-ci.com/I1820/lanserver)
 [![Go Report](https://goreportcard.com/badge/github.com/I1820/lanserver?style=flat-square)](https://goreportcard.com/report/github.com/I1820/lanserver)
 [![Buffalo](https://img.shields.io/badge/powered%20by-buffalo-blue.svg?style=flat-square)](http://gobuffalo.io)
-[![Maintainability](https://api.codeclimate.com/v1/badges/5db031209d82d7354ae0/maintainability)](https://codeclimate.com/github/I1820/lanserver/maintainability)
+[![Codacy Badge](https://img.shields.io/codacy/grade/28e224e07bec4eca96eb8c30b4535603.svg?style=flat-square)](https://www.codacy.com/project/i1820/lanserver/dashboard)
 
 ## Introduction
 
