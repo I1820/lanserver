@@ -15,3 +15,29 @@ Lanserver implementation did not cover any IoT protocol specification.
 It assumes your device is connected directly into Ethernet without any gateway.
 If you want to have specific IoT protocol and control on each aspect of that protocol
 this project is not suitable for you, please search more. :see_no_evil:
+
+## Protocol
+First of all, you must register your device in Lanserver and after that Lanserver gives you the token.
+Use the provided token on your LAN device to transmit data into Lanserver.
+
+Following MQTT topics are used in Lanserver for communicating via devices:
+
+- `/log/{deveui}/send`:
+this topic is used to transmit data into Lanserver with the following structure:
+
+[models/messages.go/LogMessage]
+```
+{
+    data: {base64 encoded data}
+    token: {token}
+}
+```
+- `/notification/{deveui}/request`:
+this topic is used to recieve data from Lanserver with the following structure:
+
+[models/messages.go/NotificationMessage]
+```
+{
+    data: {base64 encoded data}
+}
+```
