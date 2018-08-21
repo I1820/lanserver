@@ -13,6 +13,8 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo/findopt"
+	"github.com/mongodb/mongo-go-driver/mongo/mongoopt"
 )
 
 var devEUIRegexp *regexp.Regexp
@@ -146,8 +148,31 @@ func (v DevicesResource) Edit(c buffalo.Context) error {
 // Update changes a device in the DB. This function is mapped to
 // the path PUT /devices/{device_id}
 func (v DevicesResource) Update(c buffalo.Context) error {
-	//TODO
-	return c.Render(200, r.String("Device#Update"))
+	var d models.Device
+	var rq deviceReq
+
+	if err := c.Bind(&rq); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	d.Name = rq.Name
+	if d.IP = net.ParseIP(rq.IP); d.IP == nil {
+		return c.Error(http.StatusBadRequest, fmt.Errorf("Invalid ip address: %s", rq.IP))
+	}
+
+	res := db.Collection("devices").FindOneAndUpdate(c, bson.NewDocument(
+		bson.EC.String("deveui", c.Param("device_id")),
+	), bson.NewDocument(
+		bson.EC.SubDocument("$set", bson.NewDocument(
+			bson.EC.String("name", d.Name),
+			bson.EC.Interface("ip", d.IP),
+		)),
+	), findopt.ReturnDocument(mongoopt.After))
+
+	if err := res.Decode(&d); err != nil {
+		return c.Error(http.StatusInternalServerError, err)
+	}
+
+	return c.Render(200, r.JSON(d))
 }
 
 // Destroy deletes a device from the DB. This function is mapped
