@@ -42,3 +42,16 @@ this topic is used to recieve data from Lanserver with the following structure:
     data: {base64 encoded data}
 }
 ```
+
+In the application layer following MQTT topics are used in Lanserver for communicating via applications:
+
+- `/device/{deveui}/rx`:
+this topic used to transmit data into application with the following structure:
+
+[models/messages.go/RxMessage]
+```
+{
+    data: {base64 encoded data}
+    deveui: {device identification}
+}
+```
