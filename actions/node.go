@@ -90,5 +90,9 @@ func Notification(client paho.Client, message paho.Message) {
 		logger.Error(err)
 		return
 	}
-	mqttNode.Publish(fmt.Sprintf("notification/%s/request", deveui), 0, true, b)
+	var qos byte
+	if notification.Confirmed {
+		qos = 1
+	}
+	mqttNode.Publish(fmt.Sprintf("notification/%s/request", deveui), qos, true, b)
 }
