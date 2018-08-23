@@ -55,3 +55,15 @@ this topic used to transmit data into application with the following structure:
     deveui: {device identification}
 }
 ```
+
+- `/device/{deveui}/tx`:
+this topic used to transmit data from application to devices with the following structure:
+
+[models/messages.go/TxMessage]
+```
+{
+    data: {base64 encoded data}
+    fport: {TBD}
+    confirmed: {true = at least once, false = at most once}
+}
+```
