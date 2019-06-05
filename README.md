@@ -1,9 +1,7 @@
 # Lanserver
-[![Travis branch](https://img.shields.io/travis/com/I1820/lanserver/master.svg?style=flat-square)](https://travis-ci.com/I1820/lanserver)
-[![Go Report](https://goreportcard.com/badge/github.com/I1820/lanserver?style=flat-square)](https://goreportcard.com/report/github.com/I1820/lanserver)
-[![Buffalo](https://img.shields.io/badge/powered%20by-buffalo-blue.svg?style=flat-square)](http://gobuffalo.io)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/28e224e07bec4eca96eb8c30b4535603)](https://www.codacy.com/app/i1820/lanserver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=I1820/lanserver&amp;utm_campaign=Badge_Grade)
+[![Drone (cloud)](https://img.shields.io/drone/build/I1820/lanserver.svg?style=flat-square)](https://cloud.drone.io/I1820/lanserver)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/I1820/lanserver)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/i1820/lanserver.svg?style=flat-square)](https://hub.docker.com/r/i1820/lanserver)
 
 ## Introduction
 
