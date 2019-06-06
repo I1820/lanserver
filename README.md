@@ -15,7 +15,8 @@ It assumes your device is connected directly into Ethernet without any gateway.
 If you want to have specific IoT protocol and control on each aspect of that protocol
 this project is not suitable for you, please search more. :see_no_evil:
 
-## Protocol
+## Specification
+
 First of all, you must register your device in Lanserver and after that Lanserver gives you the token.
 Use the provided token on your LAN device to transmit data into Lanserver.
 
