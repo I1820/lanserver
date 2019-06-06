@@ -7,6 +7,10 @@ steps:
   commands:
     - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
     - golangci-lint run --enable-all
+- name: seed
+  image: mongo
+  commands:
+    - mongo --host database lanserver mongodb/devices_collection_index.js
 - name: test
   image: golang
   environment:
