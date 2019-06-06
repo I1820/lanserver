@@ -58,7 +58,7 @@ func (v DevicesHandler) Show(c echo.Context) error {
 	var d models.Device
 
 	result := v.db.Collection("devices").FindOne(ctx, bson.M{
-		"deveui": c.QueryParam("device_id"),
+		"deveui": c.Param("device_id"),
 	})
 
 	if err := result.Decode(&d); err != nil {
