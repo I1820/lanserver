@@ -1,40 +1,110 @@
 package actions
 
-import "github.com/I1820/lanserver/models"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 
-const (
-	dName string = "test"
-	dID   string = "0000000000000073"
-	dIP   string = "192.168.73.10"
+	"github.com/I1820/lanserver/models"
+	"github.com/labstack/echo/v4"
 )
 
-func (as *ActionSuite) Test_DevicesResource_Create_Show_Delete() {
-	resc := as.JSON("/api/devices").Post(deviceReq{
-		Name:   dName,
-		DevEUI: dID,
-		IP:     dIP,
-	})
-	as.Equalf(200, resc.Code, "Error: %s", resc.Body.String())
+const (
+	dName string = "ellie"
+	dID   string = "0000000000000073"
+)
 
-	var d models.Device
+func (suite *LSTestSuite) Test_DevicesHandler_Create_Show_Update_Delete() {
+	{
+		data, err := json.Marshal(deviceReq{
+			Name:   dName,
+			DevEUI: dID,
+		})
+		suite.NoError(err)
 
-	ress := as.JSON("/api/devices/%s", "0000000000000073").Get()
-	as.Equalf(200, ress.Code, "Error: %s", ress.Body.String())
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest(
+			"POST",
+			"/api/devices",
+			bytes.NewReader(data),
+		)
+		suite.NoError(err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		suite.engine.ServeHTTP(w, req)
+		suite.Equal(200, w.Code)
+	}
+	{
+		var d models.Device
 
-	ress.Bind(&d)
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest(
+			"GET",
+			fmt.Sprintf("/api/devices/%s", dID),
+			nil,
+		)
+		suite.NoError(err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		suite.engine.ServeHTTP(w, req)
+		suite.Equal(200, w.Code)
 
-	as.Equal(d.Name, dName)
-	as.Equal(d.DevEUI, dID)
-	as.Equal(d.IP.String(), dIP)
+		suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
 
-	resd := as.JSON("/api/devices/%s", "0000000000000073").Delete()
-	as.Equalf(200, resd.Code, "Error: %s", resd.Body.String())
+		suite.Equal(d.Name, dName)
+		suite.Equal(d.DevEUI, dID)
+	}
+	{
+		var d models.Device
+
+		data, err := json.Marshal(deviceReq{
+			Name: "elahe",
+		})
+		suite.NoError(err)
+
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest(
+			"PUT",
+			fmt.Sprintf("/api/devices/%s", dID),
+			bytes.NewReader(data),
+		)
+		suite.NoError(err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		suite.engine.ServeHTTP(w, req)
+		suite.Equal(200, w.Code)
+
+		suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
+
+		suite.Equal(d.Name, "elahe")
+		suite.Equal(d.DevEUI, dID)
+	}
+	{
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest(
+			"DELETE",
+			fmt.Sprintf("/api/devices/%s", dID),
+			nil,
+		)
+		suite.NoError(err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		suite.engine.ServeHTTP(w, req)
+		suite.Equal(200, w.Code)
+	}
 }
 
-func (as *ActionSuite) Test_DevicesResource_List() {
+func (suite *LSTestSuite) Test_DevicesHandler_List() {
 	var dl []models.Device
 
-	res := as.JSON("/api/devices").Get()
-	as.Equalf(200, res.Code, "Error: %s", res.Body.String())
-	res.Bind(&dl)
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		"GET",
+		"/api/devices",
+		nil,
+	)
+	suite.NoError(err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	suite.engine.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+
+	suite.NoError(json.Unmarshal(w.Body.Bytes(), &dl))
 }
