@@ -1,6 +1,6 @@
 package models
 
-// RxMessage represents recieved data from a device
+// RxMessage represents received data from a device
 // from lanserver to uplink
 type RxMessage struct {
 	DevEUI string

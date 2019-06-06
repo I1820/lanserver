@@ -45,7 +45,7 @@ func (n *Node) Log(client paho.Client, message paho.Message) {
 	}
 
 	if log.Token != d.Token {
-		logrus.Error(fmt.Errorf("Mismatched token"))
+		logrus.Error("mismatched token")
 		return
 	}
 
