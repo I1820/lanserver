@@ -10,36 +10,21 @@ import (
 	"time"
 
 	"github.com/I1820/lanserver/actions"
+	"github.com/I1820/lanserver/config"
+	"github.com/I1820/lanserver/db"
 	"github.com/I1820/lanserver/node"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func main() {
 	fmt.Println("18.20 at Sep 07 2016 7:20 IR721")
 
-	cfg := config()
+	cfg := config.New()
 
-	// create mongodb connection
-	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.Database.URL))
+	db, err := db.New(cfg.Database.URL, "lanserver")
 	if err != nil {
 		logrus.Fatalf("db new client error: %s", err)
 	}
-	// connect to the mongodb (change database here!)
-	ctxc, donec := context.WithTimeout(context.Background(), 10*time.Second)
-	defer donec()
-	if err := client.Connect(ctxc); err != nil {
-		logrus.Fatalf("db connection error: %s", err)
-	}
-	// is the mongo really there?
-	ctxp, donep := context.WithTimeout(context.Background(), 2*time.Second)
-	defer donep()
-	if err := client.Ping(ctxp, readpref.Primary()); err != nil {
-		logrus.Fatalf("db ping error: %s", err)
-	}
-	db := client.Database("lanserver")
 
 	app := actions.App(cfg.Debug, db)
 	go func() {
