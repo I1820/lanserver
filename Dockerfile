@@ -19,13 +19,7 @@ RUN go build -o /lanserver
 FROM alpine:latest
 
 # Metadata
-ARG BUILD_DATE
-ARG BUILD_COMMIT
-ARG BUILD_COMMIT_MSG
 LABEL maintainer="Parham Alvani <parham.alvani@gmail.com>"
-LABEL org.i1820.build-date=$BUILD_DATE
-LABEL org.i1820.build-commit-sha=$BUILD_COMMIT
-LABEL org.i1820.build-commit-msg=$BUILD_COMMIT_MSG
 
 WORKDIR /root/
 
