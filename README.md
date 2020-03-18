@@ -1,7 +1,5 @@
 # Lanserver
 [![Drone (cloud)](https://img.shields.io/drone/build/I1820/lanserver.svg?style=flat-square)](https://cloud.drone.io/I1820/lanserver)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/I1820/lanserver)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/i1820/lanserver.svg?style=flat-square)](https://hub.docker.com/r/i1820/lanserver)
 
 ## Introduction
 
