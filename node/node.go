@@ -6,16 +6,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/I1820/lanserver/models"
+	"github.com/I1820/lanserver/model"
+	"github.com/I1820/lanserver/store"
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Node handles communication with nodes over the MQTT
 type Node struct {
-	db      *mongo.Database
+	Store   store.Device
 	nodeCLI paho.Client
 	appCLI  paho.Client
 }
@@ -24,21 +23,18 @@ type Node struct {
 // we call these data that are came from devices log
 // from kaa old days.
 // thing -> log/{deveui}/send -> /device/{deveui}/rx -> app
-func (n *Node) Log(client paho.Client, message paho.Message) {
+func (n *Node) Log(_ paho.Client, message paho.Message) {
 	deveui := strings.Split(message.Topic(), "/")[1]
 
 	logrus.Infof("Device: %s /log/send", deveui)
 
-	result := n.db.Collection("devices").FindOne(context.Background(), bson.M{
-		"deveui": deveui,
-	})
-	var d models.Device
-	if err := result.Decode(&d); err != nil {
+	d, err := n.Store.Show(context.Background(), deveui)
+	if err != nil {
 		logrus.Error(err)
 		return
 	}
 
-	var log models.LogMessage
+	var log model.LogMessage
 	if err := json.Unmarshal(message.Payload(), &log); err != nil {
 		logrus.Error(err)
 		return
@@ -49,7 +45,7 @@ func (n *Node) Log(client paho.Client, message paho.Message) {
 		return
 	}
 
-	b, err := json.Marshal(models.RxMessage{
+	b, err := json.Marshal(model.RxMessage{
 		DevEUI: deveui,
 		Data:   log.Data,
 	})
@@ -64,16 +60,16 @@ func (n *Node) Log(client paho.Client, message paho.Message) {
 // we call these data that are sent to devices notification
 // from kaa old days.
 // app -> device/{deveui}/tx -> /notification/{deveui}/request -> thing
-func (n *Node) Notification(client paho.Client, message paho.Message) {
+func (n *Node) Notification(_ paho.Client, message paho.Message) {
 	deveui := strings.Split(message.Topic(), "/")[1]
 
-	var notification models.TxMessage
+	var notification model.TxMessage
 	if err := json.Unmarshal(message.Payload(), &notification); err != nil {
 		logrus.Error(err)
 		return
 	}
 
-	b, err := json.Marshal(models.NotificationMessage{
+	b, err := json.Marshal(model.NotificationMessage{
 		Data: notification.Data,
 	})
 	if err != nil {
@@ -88,12 +84,12 @@ func (n *Node) Notification(client paho.Client, message paho.Message) {
 }
 
 // New creates mqtt client and connect into broker
-func New(appBroker string, nodeBroker string, db *mongo.Database) (*Node, error) {
+func New(appBroker string, nodeBroker string, st store.Device) (*Node, error) {
 	n := &Node{
-		db: db,
+		Store: st,
 	}
 
-	// application side mqtt
+	// application side MQTT
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(appBroker)
@@ -110,7 +106,7 @@ func New(appBroker string, nodeBroker string, db *mongo.Database) (*Node, error)
 		}
 	}
 
-	// node side mqtt
+	// node side MQTT
 	{
 		opts := paho.NewClientOptions()
 		opts.AddBroker(nodeBroker)
