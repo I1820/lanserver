@@ -21,7 +21,8 @@ steps:
     commands:
       - go build
       - go test -v ./...
-  - image: plugins/docker
+  - name: docker
+    image: plugins/docker
     settings:
       username: 1995parham
       password:
