@@ -1,30 +1,39 @@
+---
 kind: pipeline
 name: default
 type: docker
 
 steps:
-- name: lint
-  image: golangci/golangci-lint
-  commands:
-    - golangci-lint run --enable-all
-- name: seed
-  image: mongo
-  commands:
-    - mongo --host database lanserver mongodb/devices_collection_index.js
-- name: test
-  image: golang
-  environment:
-    I1820_LANSERVER_APP_BROKER_ADDR: "tcp://broker:1883"
-    I1820_LANSERVER_NODE_BROKER_ADDR: "tcp://broker:1883"
-    I1820_LANSERVER_DATABASE_URL: "mongodb://database:27017"
-  commands:
-  - go build
-  - go test -v ./...
+  - name: lint
+    image: golangci/golangci-lint
+    commands:
+      - golangci-lint run --enable-all
+  - name: seed
+    image: mongo
+    commands:
+      - mongo --host database lanserver mongodb/devices_collection_index.js
+  - name: test
+    image: golang
+    environment:
+      I1820_LANSERVER_APP_BROKER_ADDR: "tcp://broker:1883"
+      I1820_LANSERVER_NODE_BROKER_ADDR: "tcp://broker:1883"
+      I1820_LANSERVER_DATABASE_URL: "mongodb://database:27017"
+    commands:
+      - go build
+      - go test -v ./...
+  - image: plugins/docker
+    settings:
+      username: 1995parham
+      password:
+        from_secret: docker_password
+      repo: i1820/lanserver
+      tags: latest
 
 services:
-- name: database
-  image: mongo:latest
-- name: broker
-  image: erlio/docker-vernemq:latest
-  environment:
-    DOCKER_VERNEMQ_ALLOW_ANONYMOUS: on
+  - name: database
+    image: mongo:latest
+  - name: broker
+    image: vernemq/vernemq:latest
+    environment:
+      DOCKER_VERNEMQ_ACCEPT_EULA: "yes"
+      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
