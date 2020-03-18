@@ -12,13 +12,13 @@ import (
 const Collection = "devices"
 
 type Device struct {
-	db *mongo.Database
+	DB *mongo.Database
 }
 
 func (d Device) Get(ctx context.Context) ([]model.Device, error) {
 	var results = make([]model.Device, 0)
 
-	cur, err := d.db.Collection(Collection).Find(ctx, bson.M{})
+	cur, err := d.DB.Collection(Collection).Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (d Device) Get(ctx context.Context) ([]model.Device, error) {
 func (d Device) Show(ctx context.Context, deviceID string) (model.Device, error) {
 	var dev model.Device
 
-	result := d.db.Collection(Collection).FindOne(ctx, bson.M{
+	result := d.DB.Collection(Collection).FindOne(ctx, bson.M{
 		"deveui": deviceID,
 	})
 
@@ -54,7 +54,7 @@ func (d Device) Show(ctx context.Context, deviceID string) (model.Device, error)
 }
 
 func (d Device) Insert(ctx context.Context, dev model.Device) error {
-	if _, err := d.db.Collection(Collection).InsertOne(ctx, dev); err != nil {
+	if _, err := d.DB.Collection(Collection).InsertOne(ctx, dev); err != nil {
 		return err
 	}
 	return nil
@@ -63,7 +63,7 @@ func (d Device) Insert(ctx context.Context, dev model.Device) error {
 func (d Device) Destroy(ctx context.Context, deviceID string) (model.Device, error) {
 	var dev model.Device
 
-	result := d.db.Collection(Collection).FindOneAndDelete(ctx, bson.M{
+	result := d.DB.Collection(Collection).FindOneAndDelete(ctx, bson.M{
 		"deveui": deviceID,
 	})
 
@@ -77,7 +77,7 @@ func (d Device) Destroy(ctx context.Context, deviceID string) (model.Device, err
 func (d Device) Update(ctx context.Context, deviceID string, field string, value interface{}) (model.Device, error) {
 	var dev model.Device
 
-	res := d.db.Collection(Collection).FindOneAndUpdate(ctx, bson.M{
+	res := d.DB.Collection(Collection).FindOneAndUpdate(ctx, bson.M{
 		"deveui": deviceID,
 	}, bson.M{
 		"$set": bson.M{
