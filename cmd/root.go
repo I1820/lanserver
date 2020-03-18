@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/I1820/lanserver/cmd/migrate"
 	"github.com/I1820/lanserver/cmd/server"
 	"github.com/I1820/lanserver/config"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ func Execute() {
 	root.Println("13 Feb 2020, Best Day Ever")
 
 	server.Register(root, cfg)
+	migrate.Register(root, cfg)
 
 	if err := root.Execute(); err != nil {
 		logrus.Errorf("failed to execute root command: %s", err.Error())

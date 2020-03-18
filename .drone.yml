@@ -9,9 +9,12 @@ steps:
     commands:
       - golangci-lint run --enable-all
   - name: seed
-    image: mongo
+    image: golang
+    environment:
+      I1820_LANSERVER_DATABASE_URL: "mongodb://database:27017"
     commands:
-      - mongo --host database lanserver mongodb/devices_collection_index.js
+      - go build
+      - lanserver migrate
   - name: test
     image: golang
     environment:
