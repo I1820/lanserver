@@ -22,23 +22,29 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config holds all lanserver component configurations
-type Config struct {
-	Debug    bool
+type (
+	// Config holds all lanserver component configurations
+	Config struct {
+		Debug    bool
+		Database Database `mapstructure:"database"`
+		App      struct {
+			Broker struct {
+				Addr string
+			}
+		}
+		Node struct {
+			Broker struct {
+				Addr string
+			}
+		}
+	}
+
+	// Database holds database configuration
 	Database struct {
-		URL string
+		URL  string `mapstructure:"url"`
+		Name string `mapstructure:"name"`
 	}
-	App struct {
-		Broker struct {
-			Addr string
-		}
-	}
-	Node struct {
-		Broker struct {
-			Addr string
-		}
-	}
-}
+)
 
 // New reads configuration with viper
 func New() Config {
