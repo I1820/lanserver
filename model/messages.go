@@ -1,4 +1,4 @@
-package models
+package model
 
 // RxMessage represents received data from a device
 // from lanserver to uplink

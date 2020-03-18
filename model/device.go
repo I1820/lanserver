@@ -1,4 +1,4 @@
-package models
+package model
 
 // Device that is connected by LAN
 type Device struct {
