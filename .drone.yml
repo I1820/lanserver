@@ -13,8 +13,8 @@ steps:
     environment:
       I1820_LANSERVER_DATABASE_URL: "mongodb://database:27017"
     commands:
-      - go build
-      - lanserver migrate
+      - go build -o lanserver
+      - ./lanserver migrate
   - name: test
     image: golang
     environment:
