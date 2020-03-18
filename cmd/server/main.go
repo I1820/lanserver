@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 	"github.com/I1820/lanserver/config"
 	"github.com/I1820/lanserver/db"
 	"github.com/I1820/lanserver/node"
+	"github.com/I1820/lanserver/store"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -23,22 +23,22 @@ func main(cfg config.Config) {
 		logrus.Fatalf("db new client error: %s", err)
 	}
 
-	app := actions.App(cfg.Debug, db)
+	st := store.Device{DB: db}
+
+	app := actions.App(cfg.Debug, st)
 	go func() {
 		if err := app.Start(":4000"); err != http.ErrServerClosed {
 			logrus.Fatalf("API Service failed with %s", err)
 		}
 	}()
 
-	if _, err := node.New(cfg.App.Broker.Addr, cfg.Node.Broker.Addr, db); err != nil {
+	if _, err := node.New(cfg.App.Broker.Addr, cfg.Node.Broker.Addr, st); err != nil {
 		logrus.Fatalf("API Service failed with %s", err)
 	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-
-	fmt.Println("18.20 As always ... left me alone")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
