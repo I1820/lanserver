@@ -19,7 +19,7 @@ func App(debug bool, st store.Device) *echo.Echo {
 	}
 
 	// routes
-	app.GET("/about", AboutHandler)
+	app.GET("/healthz", HealthzHandler)
 	g := app.Group("/api")
 	{
 		dr := DevicesHandler{st}

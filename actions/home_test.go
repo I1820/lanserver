@@ -5,12 +5,11 @@ import (
 	"net/http/httptest"
 )
 
-func (suite *LSTestSuite) Test_AboutHandler() {
+func (suite *LSTestSuite) Test_HealthzHandler() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/about", nil)
+	req, err := http.NewRequest("GET", "/healthz", nil)
 	suite.NoError(err)
 	suite.engine.ServeHTTP(w, req)
 
-	suite.Equal(200, w.Code)
-	suite.Contains(w.Body.String(), "18.20 is leaving us")
+	suite.Equal(http.StatusNoContent, w.Code)
 }

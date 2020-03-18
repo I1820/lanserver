@@ -6,6 +6,7 @@ import (
 	"github.com/I1820/lanserver/model"
 	"github.com/I1820/lanserver/request"
 	"github.com/I1820/lanserver/store"
+	"github.com/I1820/lanserver/token"
 	"github.com/labstack/echo/v4"
 )
 
@@ -63,7 +64,7 @@ func (v DevicesHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	token, err := GenerateRandomString(TokenLength)
+	token, err := token.GenerateRandomString(TokenLength)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -123,7 +124,7 @@ func (v DevicesHandler) Refresh(c echo.Context) error {
 
 	deveui := c.Param("device_id")
 
-	token, err := GenerateRandomString(TokenLength)
+	token, err := token.GenerateRandomString(TokenLength)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

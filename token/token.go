@@ -1,4 +1,4 @@
-package actions
+package token
 
 import (
 	"crypto/rand"
