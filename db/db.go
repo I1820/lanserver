@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/I1820/lanserver/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 // New creates a new mongodb connection and tests it
-func New(url string, db string) (*mongo.Database, error) {
+func New(cfg config.Database) (*mongo.Database, error) {
 	// create mongodb connection
-	client, err := mongo.NewClient(options.Client().ApplyURI(url))
+	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.URL))
 	if err != nil {
 		return nil, fmt.Errorf("db new client error: %s", err)
 	}
@@ -32,5 +33,5 @@ func New(url string, db string) (*mongo.Database, error) {
 		return nil, fmt.Errorf("db ping error: %s", err)
 	}
 
-	return client.Database(db), nil
+	return client.Database(cfg.Name), nil
 }
