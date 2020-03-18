@@ -76,6 +76,7 @@ func New() Config {
 	if err := v.UnmarshalExact(&instance); err != nil {
 		logrus.Infof("configuration: %s", err)
 	}
+
 	fmt.Printf("Following configuration is loaded:\n%+v\n", instance)
 
 	return instance

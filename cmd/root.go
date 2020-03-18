@@ -21,6 +21,7 @@ func Execute() {
 		Use:   "lanserver",
 		Short: "Lan Server, Ad-hoc standard for manage Ethernet based things similar to LoRa specification",
 	}
+
 	root.Println("13 Feb 2020, Best Day Ever")
 
 	server.Register(root, cfg)

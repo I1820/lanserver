@@ -22,6 +22,7 @@ func (suite *LSTestSuite) SetupSuite() {
 
 	db, err := db.New(cfg.Database)
 	suite.NoError(err)
+
 	st := store.Device{DB: db}
 
 	suite.engine = App(true, st)

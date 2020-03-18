@@ -53,6 +53,7 @@ func (n *Node) Log(_ paho.Client, message paho.Message) {
 		logrus.Error(err)
 		return
 	}
+
 	n.appCLI.Publish(fmt.Sprintf("device/%s/rx", deveui), 0, true, b)
 }
 
@@ -76,10 +77,12 @@ func (n *Node) Notification(_ paho.Client, message paho.Message) {
 		logrus.Error(err)
 		return
 	}
+
 	var qos byte
 	if notification.Confirmed {
 		qos = 1
 	}
+
 	n.nodeCLI.Publish(fmt.Sprintf("notification/%s/request", deveui), qos, true, b)
 }
 

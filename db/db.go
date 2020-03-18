@@ -11,6 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+const (
+	// ConnectionTimeout database connection timeout
+	ConnectionTimeout = 10 * time.Second
+	// PingTimeout database ping timeout
+	PingTimeout = 2 * time.Second
+)
+
 // New creates a new mongodb connection and tests it
 func New(cfg config.Database) (*mongo.Database, error) {
 	// create mongodb connection
@@ -20,17 +27,19 @@ func New(cfg config.Database) (*mongo.Database, error) {
 	}
 
 	// connect to the mongodb
-	ctxc, donec := context.WithTimeout(context.Background(), 10*time.Second)
+	ctxc, donec := context.WithTimeout(context.Background(), ConnectionTimeout)
 	defer donec()
+
 	if err := client.Connect(ctxc); err != nil {
-		return nil, fmt.Errorf("db connection error: %s", err)
+		return nil, fmt.Errorf("db connection error: %w", err)
 	}
 
 	// is the mongo really there?
-	ctxp, donep := context.WithTimeout(context.Background(), 2*time.Second)
+	ctxp, donep := context.WithTimeout(context.Background(), PingTimeout)
 	defer donep()
+
 	if err := client.Ping(ctxp, readpref.Primary()); err != nil {
-		return nil, fmt.Errorf("db ping error: %s", err)
+		return nil, fmt.Errorf("db ping error: %w", err)
 	}
 
 	return client.Database(cfg.Name), nil

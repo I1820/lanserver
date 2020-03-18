@@ -17,83 +17,84 @@ const (
 	dID   string = "0000000000000073"
 )
 
-func (suite *LSTestSuite) Test_DevicesHandler_Create_Show_Update_Delete() {
-	{
-		data, err := json.Marshal(request.Device{
-			Name:   dName,
-			DevEUI: dID,
-		})
-		suite.NoError(err)
+func (suite *LSTestSuite) devicesHandlerCreate() {
+	data, err := json.Marshal(request.Device{
+		Name:   dName,
+		DevEUI: dID,
+	})
+	suite.NoError(err)
 
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest(
-			"POST",
-			"/api/devices",
-			bytes.NewReader(data),
-		)
-		suite.NoError(err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		suite.engine.ServeHTTP(w, req)
-		suite.Equal(200, w.Code)
-	}
-	{
-		var d model.Device
-
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest(
-			"GET",
-			fmt.Sprintf("/api/devices/%s", dID),
-			nil,
-		)
-		suite.NoError(err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		suite.engine.ServeHTTP(w, req)
-		suite.Equal(200, w.Code)
-
-		suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
-
-		suite.Equal(d.Name, dName)
-		suite.Equal(d.DevEUI, dID)
-	}
-	{
-		var d model.Device
-
-		data, err := json.Marshal(request.Device{
-			Name: "elahe",
-		})
-		suite.NoError(err)
-
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest(
-			"PUT",
-			fmt.Sprintf("/api/devices/%s", dID),
-			bytes.NewReader(data),
-		)
-		suite.NoError(err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		suite.engine.ServeHTTP(w, req)
-		suite.Equal(200, w.Code)
-
-		suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
-
-		suite.Equal(d.Name, "elahe")
-		suite.Equal(d.DevEUI, dID)
-	}
-	{
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest(
-			"DELETE",
-			fmt.Sprintf("/api/devices/%s", dID),
-			nil,
-		)
-		suite.NoError(err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		suite.engine.ServeHTTP(w, req)
-		suite.Equal(200, w.Code)
-	}
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		"POST",
+		"/api/devices",
+		bytes.NewReader(data),
+	)
+	suite.NoError(err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	suite.engine.ServeHTTP(w, req)
+	suite.Equal(http.StatusOK, w.Code)
 }
 
-func (suite *LSTestSuite) Test_DevicesHandler_List() {
+func (suite *LSTestSuite) devicesHandlerShow() {
+	var d model.Device
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("/api/devices/%s", dID),
+		nil,
+	)
+	suite.NoError(err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	suite.engine.ServeHTTP(w, req)
+	suite.Equal(http.StatusOK, w.Code)
+
+	suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
+
+	suite.Equal(d.Name, dName)
+	suite.Equal(d.DevEUI, dID)
+}
+
+func (suite *LSTestSuite) devicesHandlerUpdate() {
+	var d model.Device
+
+	data, err := json.Marshal(request.Device{
+		Name: "elahe",
+	})
+	suite.NoError(err)
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("/api/devices/%s", dID),
+		bytes.NewReader(data),
+	)
+	suite.NoError(err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	suite.engine.ServeHTTP(w, req)
+	suite.Equal(http.StatusOK, w.Code)
+
+	suite.NoError(json.Unmarshal(w.Body.Bytes(), &d))
+
+	suite.Equal(d.Name, "elahe")
+	suite.Equal(d.DevEUI, dID)
+}
+
+func (suite *LSTestSuite) devicesHandlerDelete() {
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("/api/devices/%s", dID),
+		nil,
+	)
+	suite.NoError(err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	suite.engine.ServeHTTP(w, req)
+	suite.Equal(http.StatusOK, w.Code)
+}
+
+func (suite *LSTestSuite) devicesHandlerList() {
 	var dl []model.Device
 
 	w := httptest.NewRecorder()
@@ -105,7 +106,15 @@ func (suite *LSTestSuite) Test_DevicesHandler_List() {
 	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
-	suite.Equal(200, w.Code)
+	suite.Equal(http.StatusOK, w.Code)
 
 	suite.NoError(json.Unmarshal(w.Body.Bytes(), &dl))
+}
+
+func (suite *LSTestSuite) TestDevicesHandler() {
+	suite.Run("create", suite.devicesHandlerCreate)
+	suite.Run("show", suite.devicesHandlerShow)
+	suite.Run("update", suite.devicesHandlerUpdate)
+	suite.Run("delete", suite.devicesHandlerDelete)
+	suite.Run("delete", suite.devicesHandlerList)
 }

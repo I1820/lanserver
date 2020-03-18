@@ -9,6 +9,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	// TokenLength is device's token length
+	TokenLength = 32
+)
+
 // DevicesHandler handles registered devices
 type DevicesHandler struct {
 	Store store.Device
@@ -48,24 +53,26 @@ func (v DevicesHandler) Create(c echo.Context) error {
 	// gets the request context
 	ctx := c.Request().Context()
 
-	var d model.Device
 	var rq request.Device
 
 	if err := c.Bind(&rq); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
 	if err := rq.Validate(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	d.Name = rq.Name
-	d.DevEUI = rq.DevEUI
-
-	token, err := GenerateRandomString(32)
+	token, err := GenerateRandomString(TokenLength)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	d.Token = token
+
+	d := model.Device{
+		Name:   rq.Name,
+		DevEUI: rq.DevEUI,
+		Token:  token,
+	}
 
 	if err := v.Store.Insert(ctx, d); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -105,7 +112,7 @@ func (v DevicesHandler) Destroy(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(200, d)
+	return c.JSON(http.StatusOK, d)
 }
 
 // Refresh creates new device token. This function is mapped to
@@ -116,7 +123,7 @@ func (v DevicesHandler) Refresh(c echo.Context) error {
 
 	deveui := c.Param("device_id")
 
-	token, err := GenerateRandomString(32)
+	token, err := GenerateRandomString(TokenLength)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -125,7 +132,7 @@ func (v DevicesHandler) Refresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(200, struct {
+	return c.JSON(http.StatusOK, struct {
 		Token string `json:"token"`
 	}{
 		Token: token,

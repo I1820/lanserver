@@ -32,6 +32,7 @@ func (d Device) Get(ctx context.Context) ([]model.Device, error) {
 
 		results = append(results, result)
 	}
+
 	if err := cur.Close(ctx); err != nil {
 		return nil, err
 	}
@@ -57,6 +58,7 @@ func (d Device) Insert(ctx context.Context, dev model.Device) error {
 	if _, err := d.DB.Collection(Collection).InsertOne(ctx, dev); err != nil {
 		return err
 	}
+
 	return nil
 }
 

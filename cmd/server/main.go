@@ -17,6 +17,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	// ExitTimeout is a time that application waits for API service to exit
+	ExitTimeout = 5 * time.Second
+)
+
 func main(cfg config.Config) {
 	db, err := db.New(cfg.Database)
 	if err != nil {
@@ -26,6 +31,7 @@ func main(cfg config.Config) {
 	st := store.Device{DB: db}
 
 	app := actions.App(cfg.Debug, st)
+
 	go func() {
 		if err := app.Start(":4000"); err != http.ErrServerClosed {
 			logrus.Fatalf("API Service failed with %s", err)
@@ -40,8 +46,9 @@ func main(cfg config.Config) {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ExitTimeout)
 	defer cancel()
+
 	if err := app.Shutdown(ctx); err != nil {
 		logrus.Printf("API Service failed on exit: %s", err)
 	}
