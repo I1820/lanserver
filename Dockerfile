@@ -1,21 +1,22 @@
-# This is a multi-stage Dockerfile and requires >= Docker 17.05
-# https://docs.docker.com/engine/userguide/eng-image/multistage-build/
-FROM golang:1.12-alpine3.9 as builder
+# Start from the latest golang base image
+FROM golang:alpine AS builder
 
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-RUN apk --no-cache add git ca-certificates git gcc g++ libc-dev
+# Copy go mod and sum files
+COPY go.mod go.sum ./
 
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
-RUN go build -o /bin/app
 
-FROM alpine:3.9
+# Build the Go app
+RUN go build -o /lanserver
 
-WORKDIR /bin/
-
-COPY --from=builder /bin/app .
-
-EXPOSE 4000
+FROM alpine:latest
 
 # Metadata
 ARG BUILD_DATE
@@ -26,6 +27,14 @@ LABEL org.i1820.build-date=$BUILD_DATE
 LABEL org.i1820.build-commit-sha=$BUILD_COMMIT
 LABEL org.i1820.build-commit-msg=$BUILD_COMMIT_MSG
 
-# Comment out to run the migrations before running the binary:
-# CMD /bin/app migrate; /bin/app
-CMD ["/bin/app"]
+WORKDIR /root/
+
+COPY --from=builder /lanserver .
+
+# Expose port 4000 to the outside world
+EXPOSE 4000
+
+ENTRYPOINT ["./lanserver"]
+
+# Run server
+CMD ["server"]
