@@ -25,12 +25,11 @@ func (suite *LSTestSuite) devicesHandlerCreate() {
 	suite.NoError(err)
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
+	req := httptest.NewRequest(
 		"POST",
 		"/api/devices",
 		bytes.NewReader(data),
 	)
-	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
 	suite.Equal(http.StatusOK, w.Code)
@@ -40,12 +39,11 @@ func (suite *LSTestSuite) devicesHandlerShow() {
 	var d model.Device
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
+	req := httptest.NewRequest(
 		"GET",
 		fmt.Sprintf("/api/devices/%s", dID),
 		nil,
 	)
-	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
 	suite.Equal(http.StatusOK, w.Code)
@@ -65,12 +63,11 @@ func (suite *LSTestSuite) devicesHandlerUpdate() {
 	suite.NoError(err)
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
+	req := httptest.NewRequest(
 		"PUT",
 		fmt.Sprintf("/api/devices/%s", dID),
 		bytes.NewReader(data),
 	)
-	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
 	suite.Equal(http.StatusOK, w.Code)
@@ -83,12 +80,11 @@ func (suite *LSTestSuite) devicesHandlerUpdate() {
 
 func (suite *LSTestSuite) devicesHandlerDelete() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
+	req := httptest.NewRequest(
 		"DELETE",
 		fmt.Sprintf("/api/devices/%s", dID),
 		nil,
 	)
-	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
 	suite.Equal(http.StatusOK, w.Code)
@@ -98,12 +94,11 @@ func (suite *LSTestSuite) devicesHandlerList() {
 	var dl []model.Device
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
+	req := httptest.NewRequest(
 		"GET",
 		"/api/devices",
 		nil,
 	)
-	suite.NoError(err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	suite.engine.ServeHTTP(w, req)
 	suite.Equal(http.StatusOK, w.Code)
